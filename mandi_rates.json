@@ -1,0 +1,62 @@
+{
+  "scraped_at": "2026-03-31T12:00:00.000",
+  "config": {
+    "state": "Uttar Pradesh",
+    "district": "Prayagraj",
+    "commodity": "Wheat",
+    "date": "31/03/2026"
+  },
+  "total_records": 5,
+  "data": [
+    {
+      "commodity": "Wheat",
+      "state": "Uttar Pradesh",
+      "district": "Prayagraj",
+      "market": "Allahabad",
+      "min_price": "2100",
+      "max_price": "2300",
+      "modal_price": "2250",
+      "price date": "31/03/2026"
+    },
+    {
+      "commodity": "Wheat",
+      "state": "Uttar Pradesh",
+      "district": "Lucknow",
+      "market": "Lucknow",
+      "min_price": "2150",
+      "max_price": "2350",
+      "modal_price": "2300",
+      "price date": "31/03/2026"
+    },
+    {
+      "commodity": "Tomato",
+      "state": "Uttar Pradesh",
+      "district": "Prayagraj",
+      "market": "Allahabad",
+      "min_price": "1500",
+      "max_price": "2000",
+      "modal_price": "1800",
+      "price date": "31/03/2026"
+    },
+    {
+      "commodity": "Potato",
+      "state": "Uttar Pradesh",
+      "district": "Kanpur",
+      "market": "Kanpur",
+      "min_price": "1000",
+      "max_price": "1400",
+      "modal_price": "1200",
+      "price date": "31/03/2026"
+    },
+    {
+      "commodity": "Rice",
+      "state": "Uttar Pradesh",
+      "district": "Varanasi",
+      "market": "Varanasi",
+      "min_price": "3000",
+      "max_price": "3500",
+      "modal_price": "3200",
+      "price date": "31/03/2026"
+    }
+  ]
+}

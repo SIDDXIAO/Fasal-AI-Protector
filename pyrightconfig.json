@@ -1,0 +1,13 @@
+{
+  "pythonVersion": "3.11",
+  "extraPaths": [
+    ".",
+    "apps"
+  ],
+  "reportMissingImports": "none",
+  "reportMissingModuleSource": "none",
+  "reportUndefinedVariable": "warning",
+  "ignore": [
+    "**/migrations/**"
+  ]
+}

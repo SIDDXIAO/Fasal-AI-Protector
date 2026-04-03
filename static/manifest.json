@@ -1,0 +1,28 @@
+{
+  "name": "Fasal AI Protector",
+  "short_name": "FasalAI",
+  "description": "AI-powered crop disease detection & farming assistant for Indian farmers",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0f1c",
+  "theme_color": "#00b09b",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/static/assets/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/assets/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["agriculture", "productivity", "utilities"],
+  "lang": "en",
+  "dir": "ltr",
+  "scope": "/"
+}

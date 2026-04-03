@@ -1,0 +1,805 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fasal AI Protector — Smart Crop Disease Detection</title>
+    <meta name="description"
+        content="AI-powered crop disease detection and farming assistant for Indian farmers. Detect 38+ plant diseases instantly with 92%+ accuracy.">
+    <meta name="theme-color" content="#00b09b">
+
+    <!-- PWA -->
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <link rel="icon" type="image/png" href="{% static 'assets/logo.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'assets/logo.png' %}">
+
+    <!-- Fonts & Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=4.0">
+    <link rel="stylesheet" href="{% static 'css/chat-styles.css' %}?v=4.0">
+</head>
+
+<body>
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- ═══════════════════════════════════════
+         LOGIN / SIGNUP SCREEN
+         ═══════════════════════════════════════ -->
+    <div id="login-container">
+        <!-- Animated floating orbs -->
+        <div class="auth-orb auth-orb-1"></div>
+        <div class="auth-orb auth-orb-2"></div>
+        <div class="auth-orb auth-orb-3"></div>
+        <div class="auth-orb auth-orb-4"></div>
+
+        <!-- Floating particles -->
+        <div class="auth-particles">
+            <span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span>
+        </div>
+
+        <div class="auth-card">
+            <!-- Glow ring behind logo -->
+            <div class="auth-logo-section">
+                <div class="auth-logo-ring">
+                    <div class="auth-logo-inner">
+                        <img src="{% static 'assets/logo.png' %}" alt="Fasal AI Logo">
+                    </div>
+                </div>
+                <h1 class="auth-title">Fasal AI Protector</h1>
+                <p class="auth-subtitle">🌱 AI-Powered Crop Disease Detection</p>
+            </div>
+
+            <div class="auth-tabs">
+                <button class="auth-tab-btn active" id="tab-login" onclick="switchAuthTab('login', this)">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+                <button class="auth-tab-btn" id="tab-signup" onclick="switchAuthTab('signup', this)">
+                    <i class="fas fa-user-plus"></i> Sign Up
+                </button>
+                <div class="auth-tab-indicator" id="auth-tab-indicator"></div>
+            </div>
+
+            <!-- Login Form -->
+            <div id="login-section" class="auth-form-section" style="display:block;">
+                <div class="input-group">
+                    <label><i class="fas fa-user"></i> Username</label>
+                    <input type="text" id="login-username" placeholder="Enter your username" autocomplete="username">
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+                </div>
+                <button class="btn-auth" id="login-btn" onclick="handleLogin()">
+                    <span class="btn-auth-text"><i class="fas fa-sign-in-alt"></i> Login</span>
+                    <span class="btn-auth-shine"></span>
+                </button>
+
+                <div class="auth-features">
+                    <div class="auth-feature-chip"><i class="fas fa-leaf"></i> 38+ Diseases</div>
+                    <div class="auth-feature-chip"><i class="fas fa-brain"></i> AI Powered</div>
+                    <div class="auth-feature-chip"><i class="fas fa-bolt"></i> Instant</div>
+                </div>
+            </div>
+
+            <!-- Signup Form -->
+            <div id="signup-section" class="auth-form-section" style="display:none;">
+                <div class="input-group">
+                    <label><i class="fas fa-user"></i> Full Name</label>
+                    <input type="text" id="reg-name" placeholder="Rajesh Kumar" autocomplete="name">
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-at"></i> Username</label>
+                    <input type="text" id="reg-username" placeholder="rajesh_farmer" autocomplete="username">
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-envelope"></i> Email</label>
+                    <input type="email" id="reg-email" placeholder="rajesh@example.com" autocomplete="email">
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="reg-password" placeholder="Min 6 characters" autocomplete="new-password">
+                </div>
+                <div class="auth-form-row">
+                    <div class="input-group">
+                        <label><i class="fas fa-phone"></i> Phone Number </label>
+                        <input type="tel" id="reg-phone" placeholder="+91 98765 43210">
+                    </div>
+                </div>
+                <div class="auth-form-row">
+                    <div class="input-group">
+                        <label><i class="fas fa-map-pin"></i> Pincode </label>
+                        <input type="text" id="reg-pincode" placeholder="e.g. 226001"
+                            onblur="fetchLocationFromPincode(this.value, 'reg-location')">
+                    </div>
+                    <div class="input-group">
+                        <label><i class="fas fa-map-marker-alt"></i> Location </label>
+                        <input type="text" id="reg-location" placeholder="Lucknow, UP">
+                    </div>
+                </div>
+                <button class="btn-auth" id="signup-btn" onclick="handleSignup()">
+                    <span class="btn-auth-text"><i class="fas fa-user-plus"></i> Create Account</span>
+                    <span class="btn-auth-shine"></span>
+                </button>
+            </div>
+
+            <div class="auth-footer">
+                <span>🇮🇳</span> Made for Indian Farmers
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         APP LAYOUT
+         ═══════════════════════════════════════ -->
+    <div id="app-wrapper">
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <div class="brand">
+                <div class="brand-logo" style="width:28px; height:28px;">
+                    <img src="{% static 'assets/logo.png' %}" alt="Logo"
+                        style="width: 100%; height: 100%; border-radius: 6px;">
+                </div>
+                Fasal AI Protector
+            </div>
+            <ul class="menu" style="display:flex; flex-direction:column; flex:1;">
+                <li><a onclick="showPage('dashboard')" id="nav-dashboard" class="active"><i class="fas fa-home"></i>
+                        <span>Dashboard</span></a></li>
+                <li><a onclick="showPage('scanner')" id="nav-scanner"><i class="fas fa-camera"></i> <span>AI
+                            Scanner</span></a></li>
+                <li><a onclick="showPage('analytics')" id="nav-analytics"><i class="fas fa-chart-line"></i>
+                        <span>Analytics</span></a></li>
+                <li><a onclick="showPage('history')" id="nav-history"><i class="fas fa-history"></i>
+                        <span>History</span></a></li>
+                <li><a onclick="showPage('assistant')" id="nav-assistant"><i class="fas fa-robot"></i> <span>AI
+                            Assistant</span></a></li>
+                <li><a onclick="showPage('mandi')" id="nav-mandi"><i class="fas fa-store"></i> <span>Mandi
+                            Rates</span></a></li>
+                <li style="margin-top:auto;"><a onclick="handleLogout()" style="color:#ef4444;"><i
+                            class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header>
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <button class="theme-btn" onclick="document.body.classList.toggle('sidebar-toggled')"
+                        aria-label="Menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2 id="page-title">Dashboard</h2>
+                </div>
+
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <div style="font-weight: 600; margin-right: 8px; font-size:0.9rem;" id="user-display-name">Farmer
+                    </div>
+
+                    <div class="language-selector" id="lang-selector" style="position: relative;">
+                        <button onclick="toggleLanguageMenu()" class="theme-btn" id="lang-btn" title="Change Language">
+                            <i class="fas fa-globe"></i>
+                        </button>
+                        <div class="lang-menu" id="lang-menu"
+                            style="display:none; position: absolute; right: 0; top: 100%; margin-top: 5px; background: var(--bg-card); box-shadow: var(--shadow-lg); border-radius: var(--radius-md); border: 1px solid var(--border-color); padding: 5px 0; min-width: 150px; z-index: 9999;">
+                            <div onclick="changeLanguage('en')" class="lang-option" style="padding: 10px 18px;">English
+                            </div>
+                            <div onclick="changeLanguage('hi')" class="lang-option" style="padding: 10px 18px;">हिंदी
+                            </div>
+                            <div onclick="changeLanguage('bho')" class="lang-option" style="padding: 10px 18px;">भोजपुरी
+                            </div>
+                            <div onclick="changeLanguage('pa')" class="lang-option" style="padding: 10px 18px;">ਪੰਜਾਬੀ
+                            </div>
+                            <div onclick="changeLanguage('mr')" class="lang-option" style="padding: 10px 18px;">मराठी
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="theme-btn" onclick="startVoice()" style="color:var(--danger);">
+                        <i class="fas fa-microphone" id="mic-icon"></i>
+                    </button>
+
+                    <button class="theme-btn" onclick="toggleTheme()">
+                        <i class="fas fa-moon" id="theme-icon"></i>
+                    </button>
+
+                    <button class="theme-btn" onclick="showPage('profile')" title="Profile" id="nav-profile-btn"
+                        style="color:var(--primary); padding: 0; display: flex; justify-content: center; align-items: center; overflow: hidden; border-radius: 50%;">
+                        <i class="fas fa-user-circle" id="nav-profile-icon" style="padding: 8px;"></i>
+                        <img id="nav-profile-avatar" src=""
+                            style="display:none; width: 100%; height: 100%; object-fit: cover;">
+                    </button>
+                </div>
+            </header>
+
+            <div class="dashboard-container">
+
+                <!-- ═══ DASHBOARD ═══ -->
+                <div id="dashboard-view" class="view-section active">
+
+                    <div id="weather-alert" class="alert-banner">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <i class="fas fa-cloud-showers-heavy" style="font-size:1.3rem;"></i>
+                            <div>
+                                <strong>Weather Alert:</strong> Heavy rain expected in next 24 hours.
+                                <div style="font-size:0.82rem; margin-top:2px;">Delay irrigation and cover harvested
+                                    crops.</div>
+                            </div>
+                        </div>
+                        <button onclick="document.getElementById('weather-alert').style.display='none'"
+                            style="background:none; border:none; color:inherit; cursor:pointer; font-size:1.2rem; padding:4px;">&times;</button>
+                    </div>
+
+                    <div class="welcome-banner">
+                        <div class="welcome-text">
+                            <h1 id="welcome-msg" data-i18n="helloFarmer">Hello, Farmer! 👋</h1>
+                            <p data-i18n="farmerOverview">Your smart farm overview.</p>
+                        </div>
+                        <div class="weather-widget">
+                            <div style="font-size: 0.9rem; opacity:0.85;"><i class="fas fa-map-marker-alt"></i> Lucknow
+                            </div>
+                            <div class="weather-temp">28°C <i class="fas fa-sun" style="color: #ffd700;"></i></div>
+                        </div>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon bg-green"><i class="fas fa-leaf"></i></div>
+                            <div class="stat-value" id="stat-total">0</div>
+                            <div style="color:var(--text-light); font-size:0.85rem;" data-i18n="totalScans">Total Scans
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-green"><i class="fas fa-check-circle"></i></div>
+                            <div class="stat-value" id="stat-healthy">0</div>
+                            <div style="color:var(--text-light); font-size:0.85rem;" data-i18n="healthyScans">Healthy
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-red"><i class="fas fa-bug"></i></div>
+                            <div class="stat-value" id="stat-infected">0</div>
+                            <div style="color:var(--text-light); font-size:0.85rem;" data-i18n="infectedScans">Infected
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-orange"><i class="fas fa-flask"></i></div>
+                            <div class="stat-value" id="stat-efficiency">—</div>
+                            <div style="color:var(--text-light); font-size:0.85rem;" data-i18n="efficiency">Efficiency
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-widgets">
+                        <div class="chart-box">
+                            <h3>📊 Weekly Scan Activity</h3>
+                            <div style="position:relative; height:250px; width:100%;"><canvas id="weeklyChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-box">
+                            <h3>🧪 Fertilizer Calculator</h3>
+                            <p style="color:var(--text-light); font-size:0.85rem; margin-bottom:14px;">Calculate
+                                nutrients (Urea/DAP).</p>
+
+                            <div style="margin-bottom:10px;">
+                                <label
+                                    style="font-size:0.82rem; color:var(--text-light); display:block; margin-bottom:4px;">Select
+                                    Crop</label>
+                                <select id="calc-crop"
+                                    style="width:100%; padding:10px; border-radius:var(--radius-md); border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-main); font-size:0.9rem;">
+                                    <optgroup label="Cereals / Grains (अनाज)">
+                                        <option value="wheat">Wheat (गेहूं)</option>
+                                        <option value="paddy">Paddy (धान)</option>
+                                        <option value="bajra">Bajra (बाजरा)</option>
+                                        <option value="maize">Maize (मक्का)</option>
+                                    </optgroup>
+                                    <optgroup label="Cash Crops (नगदी फसलें)">
+                                        <option value="sugarcane">Sugarcane (गन्ना)</option>
+                                        <option value="mustard">Mustard (सरसों)</option>
+                                        <option value="potato">Potato (आलू)</option>
+                                        <option value="tomato">Tomato (टमाटर)</option>
+                                    </optgroup>
+                                    <optgroup label="Vegetables (सब्जियां)">
+                                        <option value="brinjal">Brinjal (बैंगन)</option>
+                                        <option value="okra">Okra (भिंडी)</option>
+                                        <option value="chilli">Chilli (मिर्च)</option>
+                                        <option value="cauliflower">Cauliflower (फूलगोभी)</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+
+                            <div style="display:flex; gap:10px; margin-bottom:14px;">
+                                <div style="flex:1;">
+                                    <label
+                                        style="font-size:0.82rem; color:var(--text-light); display:block; margin-bottom:4px;">Unit</label>
+                                    <select id="calc-unit"
+                                        style="width:100%; padding:10px; border-radius:var(--radius-md); border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-main); font-size:0.9rem;">
+                                        <option value="acre">Acre (एकड़)</option>
+                                        <option value="bigha">Bigha (बीघा)</option>
+                                        <option value="hectare">Hectare (हेक्टेयर)</option>
+                                        <option value="dismil" selected>Dismil (डिसमिल)</option>
+                                    </select>
+                                </div>
+                                <div style="flex:1;">
+                                    <label id="calc-area-label"
+                                        style="font-size:0.82rem; color:var(--text-light); display:block; margin-bottom:4px;">Size
+                                        (in Dismil)</label>
+                                    <input type="number" id="calc-area" placeholder="e.g. 50"
+                                        style="width:100%; padding:10px; border-radius:var(--radius-md); border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-main); font-size:0.9rem;">
+                                </div>
+                            </div>
+
+                            <button class="btn-auth" onclick="calculateFertilizer()"
+                                style="background:var(--primary);">Calculate Dose</button>
+
+                            <div id="calc-result">
+                                <h4 style="color:var(--primary); margin-bottom:8px; font-size:0.9rem;">✅ Recommended
+                                    Dose:</h4>
+                                <div
+                                    style="display:flex; justify-content:space-between; font-weight:600; font-size:0.95rem;">
+                                    <span>⚪ Urea: <span id="res-urea">0</span> kg</span>
+                                    <span>🟤 DAP: <span id="res-dap">0</span> kg</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ SCANNER ═══ -->
+                <div id="scanner-view" class="view-section">
+                    <div class="scanner-pro-container">
+                        <div class="scanner-pro-header">
+                            <div class="scanner-badge"><i class="fas fa-brain"></i> AI-POWERED DIAGNOSIS</div>
+                            <h2>Disease <span class="gradient-text">Scanner</span></h2>
+                            <p>Upload a leaf photo — our ViT model identifies 38+ diseases instantly with 92%+ accuracy
+                            </p>
+                        </div>
+
+                        <div class="scanner-pro-grid">
+                            <!-- Left: Upload -->
+                            <div class="scanner-upload-col">
+                                <div class="scan-tabs">
+                                    <button class="tab-btn active" onclick="switchScanTab('upload-area', this)"><i
+                                            class="fas fa-upload"></i> Upload</button>
+                                    <button class="tab-btn" onclick="switchScanTab('camera-area', this)"><i
+                                            class="fas fa-camera"></i> Camera</button>
+                                    <button class="tab-btn" onclick="switchScanTab('link-area', this)"><i
+                                            class="fas fa-link"></i> URL</button>
+                                </div>
+
+                                <!-- Drag-Drop -->
+                                <div id="upload-area" class="drop-zone show" ondragover="handleDragOver(event)"
+                                    ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+                                    <div id="drop-zone-content">
+                                        <div class="drop-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                                        <p class="drop-title">Drop leaf image here</p>
+                                        <p class="drop-sub">or click to browse (JPG, PNG, WebP)</p>
+                                        <label class="drop-browse-btn">
+                                            <i class="fas fa-folder-open"></i> Browse Files
+                                            <input type="file" id="file-input" accept="image/*"
+                                                onchange="handleFile(this)" style="display:none;">
+                                        </label>
+                                        <p class="drop-hint"><i class="fas fa-leaf"></i> Supports 38+ crop disease
+                                            classes</p>
+                                    </div>
+                                </div>
+
+                                <div id="camera-area" class="input-area">
+                                    <video id="video-feed" autoplay playsinline style="display:none;"></video>
+                                    <canvas id="canvas" style="display:none;"></canvas>
+                                    <button class="btn-auth" onclick="startCamera()" id="start-cam-btn">Start
+                                        Camera</button>
+                                    <button class="btn-auth" onclick="captureImage()" id="capture-btn"
+                                        style="display:none; background:var(--danger);">Capture</button>
+                                </div>
+
+                                <div id="link-area" class="input-area">
+                                    <input type="text" id="url-input" placeholder="Paste Image URL"
+                                        style="width:100%; padding:10px; border:1px solid var(--border-color); border-radius:var(--radius-md); background:var(--bg-input); color:var(--text-main);">
+                                    <button class="btn-auth" onclick="loadUrl()" style="margin-top:10px;">Load</button>
+                                </div>
+
+                                <!-- Preview -->
+                                <div id="preview-box" style="display:none; margin-top:16px; position:relative;">
+                                    <div class="preview-wrapper">
+                                        <img id="preview-img" src=""
+                                            style="width:100%; border-radius:var(--radius-lg); max-height:280px; object-fit:cover;">
+                                        <div class="scan-overlay" id="scan-overlay" style="display:none;">
+                                            <div class="scan-line"></div>
+                                            <div class="scan-spinner-wrap">
+                                                <div class="scan-spinner"></div>
+                                                <p class="scan-analyzing-text">Analyzing...</p>
+                                            </div>
+                                        </div>
+                                        <button onclick="clearScanPreview()" class="preview-clear-btn"><i
+                                                class="fas fa-times"></i></button>
+                                    </div>
+                                    <button class="btn-auth scan-analyze-btn" onclick="runPrediction()"
+                                        id="predict-btn">
+                                        <i class="fas fa-search"></i> Analyze Now
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Right: Results -->
+                            <div class="scanner-result-col">
+                                <div class="result-placeholder" id="result-placeholder">
+                                    <i class="fas fa-leaf"></i>
+                                    <p>Upload a leaf image to begin diagnosis</p>
+                                    <span style="font-size:0.85rem;">Results will appear here with treatment
+                                        options</span>
+                                </div>
+
+                                <div class="result-pro-card" id="result-box" style="display:none;">
+                                    <div class="result-disease-header">
+                                        <div class="result-disease-icon" id="result-icon"><i
+                                                class="fas fa-exclamation-triangle"></i></div>
+                                        <div>
+                                            <h3 id="pest-name">Disease Name</h3>
+                                            <p id="result-crop-label"
+                                                style="color:var(--text-light); font-size:0.85rem;">Crop • Detected</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="confidence-section">
+                                        <div class="confidence-label">
+                                            <span>Confidence</span>
+                                            <span class="confidence-value" id="confidence-value">0%</span>
+                                        </div>
+                                        <div class="confidence-track">
+                                            <div class="confidence-fill" id="confidence-fill"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="severity-row">
+                                        <span style="color:var(--text-light); font-size:0.85rem;">Severity:</span>
+                                        <span class="severity-badge" id="severity-badge">Medium</span>
+                                    </div>
+
+                                    <div class="treatment-cards">
+                                        <div class="treatment-card treatment-chemical">
+                                            <div class="treatment-card-header"><i class="fas fa-pills"></i>
+                                                <span>Chemical Treatment</span>
+                                            </div>
+                                            <p id="remedy">—</p>
+                                        </div>
+                                        <div class="treatment-card treatment-organic">
+                                            <div class="treatment-card-header"><i class="fas fa-seedling"></i>
+                                                <span>Organic Remedy</span>
+                                            </div>
+                                            <p id="remedy-organic">—</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="result-footer">
+                                        <i class="fas fa-check-circle"></i> Diagnosis powered by ViT Model + Dataset
+                                        Matching
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ ANALYTICS ═══ -->
+                <div id="analytics-view" class="view-section">
+                    <h2 style="margin-bottom:20px;" data-i18n="detailedAnalytics">Detailed Analytics</h2>
+                    <div style="display:grid; grid-template-columns: 2fr 1fr; gap:20px;">
+                        <div class="chart-box">
+                            <h3>📈 Disease Trends</h3>
+                            <div style="position:relative; height:300px; width:100%;"><canvas id="trendChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-box">
+                            <h3>🥧 Crop Health</h3>
+                            <div style="position:relative; height:300px; width:100%;"><canvas id="healthChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ HISTORY ═══ -->
+                <div id="history-view" class="view-section">
+                    <h2 style="margin-bottom:20px;" data-i18n="scanHistory">Scan History</h2>
+                    <div class="history-list" id="history-container">
+                        <div style="text-align:center; padding:40px; color:var(--text-light);">
+                            <i class="fas fa-history" style="font-size:2rem; margin-bottom:12px; display:block;"></i>
+                            <p>No scans yet. Start scanning to see history here.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ AI ASSISTANT ═══ -->
+                <div id="assistant-view" class="view-section" style="height: calc(100vh - 120px);">
+                    <div class="chat-container modern-chat">
+
+                        <!-- Header -->
+                        <div class="modern-chat-header">
+                            <div class="header-title">
+                                <div class="bot-avatar">🤖</div>
+                                <div>
+                                    <h2>Fasal AI</h2>
+                                    <span class="status-badge"><i class="fas fa-circle"></i> Online</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Messages -->
+                        <div id="ai-messages" class="modern-chat-messages">
+
+                            <!-- Initial Greeting -->
+                            <div class="ai-bubble ai-bot-bubble">
+                                <div class="message-content-wrapper">
+                                    <div class="avatar-icon">🤖</div>
+                                    <div class="message-text">
+                                        <strong>नमस्ते किसान भाई! / Hello Farmer! 🌾</strong><br><br>
+                                        I am <b>Fasal AI</b>, your smart agricultural assistant.<br>
+                                        How can I help you today?<br><br>
+                                        <div class="topic-suggestions">
+                                            <button class="ai-chip"
+                                                onclick="sendAssistantMsg('गेहूं में कौन सी खाद डालें?')">🌾 Wheat
+                                                Fertilizer</button>
+                                            <button class="ai-chip"
+                                                onclick="sendAssistantMsg('टमाटर में रोग पहचान और उपाय')">🍅 Tomato
+                                                Diseases</button>
+                                            <button class="ai-chip"
+                                                onclick="sendAssistantMsg('Best pesticide for potato crop?')">🥔 Potato
+                                                Pest</button>
+                                            <button class="ai-chip"
+                                                onclick="sendAssistantMsg('Wheat price in mandi today')">💰 Mandi
+                                                Rates</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Typing Indicator -->
+                        <div id="ai-typing" style="display:none; padding: 10px 40px;">
+                            <div class="typing-indicator">
+                                <span></span><span></span><span></span>
+                            </div>
+                        </div>
+
+                        <!-- Input Area -->
+                        <div class="modern-chat-input-wrapper">
+                            <div class="modern-input-box">
+                                <button onclick="startAssistantVoice()" class="icon-btn voice-btn" title="Voice Input">
+                                    <i class="fas fa-microphone" id="ai-mic-icon"></i>
+                                </button>
+                                <input type="text" id="ai-input" placeholder="Message Fasal AI..."
+                                    onkeypress="if(event.key==='Enter') sendAssistantMsg()" autocomplete="off">
+                                <button onclick="sendAssistantMsg()" class="icon-btn send-btn" title="Send Message">
+                                    <i class="fas fa-arrow-up"></i>
+                                </button>
+                            </div>
+                            <div class="chat-footer-text">AI can make mistakes. Verify important agricultural decisions.
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- ═══ HISTORY MODAL ═══ -->
+                <div id="history-modal" class="history-modal" style="display:none;">
+                    <div class="history-modal-content">
+                        <div
+                            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                            <h2 style="margin:0; font-size:1.2rem;">Scan Details</h2>
+                            <div style="display:flex; gap:8px; align-items:center;">
+                                <button onclick="exportCurrentScan()" class="modal-export-btn" title="Export as PDF">
+                                    <i class="fas fa-file-pdf"></i> Export
+                                </button>
+                                <button onclick="closeHistoryModal()"
+                                    style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--text-main); padding:4px;">&times;</button>
+                            </div>
+                        </div>
+                        <div style="text-align:center; margin-bottom:20px;">
+                            <img id="modal-img" src=""
+                                style="max-width:100%; max-height:300px; border-radius:var(--radius-lg); box-shadow:var(--shadow-md);">
+                        </div>
+                        <div
+                            style="background:var(--bg-main); padding:20px; border-radius:var(--radius-lg); margin-bottom:12px;">
+                            <div
+                                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                                <h3 id="modal-title" style="margin:0;">Disease Name</h3>
+                                <div id="modal-status" class="status-badge">Status</div>
+                            </div>
+                            <div style="font-size:0.85rem; color:var(--text-light); margin-bottom:16px;"
+                                id="modal-date">Date & Time</div>
+                            <div id="modal-remedy-container"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ MANDI RATES ═══ -->
+                <!-- MANDI SECTION REPLACEMENT — paste over existing mandi-view div -->
+                <div id="mandi-view" class="view-section">
+                    <div
+                        style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+                        <h2 style="margin:0;">📈 Mandi Rates</h2>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <span id="mandi-last-updated" style="font-size:0.8rem; color:var(--text-light);"></span>
+                            <button onclick="refreshMandiRates()" style="background:var(--primary); color:#fff; border:none; padding:8px 16px;
+                           border-radius:var(--radius-full); font-size:0.85rem; cursor:pointer;
+                           display:flex; align-items:center; gap:6px;">
+                                <i class="fas fa-sync-alt" id="mandi-refresh-icon"></i> Refresh
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filter Bar -->
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
+                        <input type="text" id="mandi-search" placeholder="🔍 Search crop..."
+                            oninput="filterMandiTable(this.value)" style="padding:8px 14px; border-radius:var(--radius-full);
+                      border:1px solid var(--border-color); background:var(--bg-input);
+                      color:var(--text-main); font-size:0.9rem; min-width:200px;">
+                        <select id="mandi-sort" onchange="sortMandiTable(this.value)" style="padding:8px 14px; border-radius:var(--radius-full);
+                       border:1px solid var(--border-color); background:var(--bg-input);
+                       color:var(--text-main); font-size:0.9rem;">
+                            <option value="name">Sort: A–Z</option>
+                            <option value="price-high">Price: High–Low</option>
+                            <option value="price-low">Price: Low–High</option>
+                            <option value="change">Biggest Change</option>
+                        </select>
+                    </div>
+
+                    <div style="max-width:960px; margin:0 auto;">
+                        <div style="overflow-x:auto; background:var(--bg-card); border-radius:var(--radius-lg);
+                    border:1px solid var(--border-color);">
+                            <table class="mandi-table" style="width:100%; border-collapse:collapse;">
+                                <thead>
+                                    <tr style="background:var(--bg-main);">
+                                        <th style="padding:14px 16px; text-align:left;">Crop</th>
+                                        <th style="padding:14px 16px; text-align:right;">Prev (₹/qtl)</th>
+                                        <th style="padding:14px 16px; text-align:right;">Today (₹/qtl)</th>
+                                        <th style="padding:14px 16px; text-align:center;">Change</th>
+                                        <th style="padding:14px 16px; text-align:center;">Trend</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="mandi-tbody">
+                                    <tr>
+                                        <td colspan="5"
+                                            style="text-align:center; padding:40px; color:var(--text-light);">
+                                            <i class="fas fa-spinner fa-spin"></i> Loading mandi rates...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p style="font-size:0.75rem; color:var(--text-light); text-align:center; margin-top:12px;">
+                            <i class="fas fa-info-circle"></i>
+                            Data sourced from Agmarknet / UPASNA. Prices in ₹ per quintal.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- ═══ USER PROFILE ═══ -->
+                <!-- PROFILE SECTION REPLACEMENT — paste this over the existing profile-view div -->
+                <div id="profile-view" class="view-section">
+                    <h2 style="margin-bottom:20px;">👤 User Profile</h2>
+                    <div
+                        style="max-width: 600px; margin: 0 auto; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-color); padding: 24px; box-shadow: var(--shadow-sm);">
+
+                        <!-- ── Profile Photo Upload ── -->
+                        <div style="display:flex; flex-direction:column; align-items:center; margin-bottom:24px;">
+                            <div id="profile-photo-wrap"
+                                style="position:relative; width:100px; height:100px; cursor:pointer;"
+                                onclick="document.getElementById('profile-photo-input').click()">
+                                <img id="profile-photo-img" src="" alt="Profile" onerror="this.src=''" style="width:100px; height:100px; border-radius:50%; object-fit:cover;
+                            border:3px solid var(--primary);
+                            background:var(--bg-main);
+                            display:block;">
+                                <div id="profile-photo-placeholder" style="width:100px; height:100px; border-radius:50%;
+                            background:var(--bg-main); border:3px solid var(--primary);
+                            display:flex; align-items:center; justify-content:center;
+                            font-size:2.5rem; color:var(--primary); position:absolute; top:0; left:0;">
+                                    <i class="fas fa-user-circle"></i>
+                                </div>
+                                <div style="position:absolute; bottom:0; right:0;
+                            background:var(--primary); color:#fff;
+                            width:28px; height:28px; border-radius:50%;
+                            display:flex; align-items:center; justify-content:center;
+                            font-size:0.8rem; border:2px solid var(--bg-card); cursor:pointer;" title="Change photo">
+                                    <i class="fas fa-camera"></i>
+                                </div>
+                            </div>
+                            <input type="file" id="profile-photo-input" accept="image/*" style="display:none;"
+                                onchange="handleProfilePhotoChange(event)">
+                            <p style="font-size:0.8rem; color:var(--text-light); margin-top:8px;">
+                                Click to upload photo
+                            </p>
+                        </div>
+
+                        <div class="input-group">
+                            <label><i class="fas fa-user"></i> Full Name</label>
+                            <input type="text" id="prof-name" placeholder="Rajesh Kumar" style="width:100%; padding:10px; border-radius:var(--radius-md);
+                          border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-main);">
+                        </div>
+                        <div class="input-group" style="margin-top:15px">
+                            <label><i class="fas fa-envelope"></i> Email (Read-only)</label>
+                            <input type="email" id="prof-email" readonly style="width:100%; padding:10px; border-radius:var(--radius-md);
+                          border:1px solid var(--border-color); background:var(--bg-input);
+                          color:var(--text-light); opacity:0.7;">
+                        </div>
+                        <div class="input-group" style="margin-top:15px">
+                            <label><i class="fas fa-phone"></i> Phone</label>
+                            <input type="tel" id="prof-phone" placeholder="+91 98765 43210" style="width:100%; padding:10px; border-radius:var(--radius-md);
+                          border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-main);">
+                        </div>
+                        <div class="auth-form-row" style="margin-top:15px; display:flex; gap:12px;">
+                            <div class="input-group" style="flex:1;">
+                                <label><i class="fas fa-map-pin"></i> Pincode</label>
+                                <input type="text" id="prof-pincode" placeholder="e.g. 226001"
+                                    onblur="fetchLocationFromPincode(this.value,'prof-location')"
+                                    style="width:100%; padding:10px; border-radius:var(--radius-md);
+                              border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-main);">
+                            </div>
+                            <div class="input-group" style="flex:1;">
+                                <label><i class="fas fa-map-marker-alt"></i> Location</label>
+                                <input type="text" id="prof-location" placeholder="Lucknow, UP"
+                                    style="width:100%; padding:10px; border-radius:var(--radius-md);
+                              border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-main);">
+                            </div>
+                        </div>
+
+                        <div style="margin-top:25px; display:flex; gap:12px;">
+                            <button class="btn-auth" onclick="updateProfile()" id="update-profile-btn"
+                                style="flex:1; background:var(--primary);">
+                                <i class="fas fa-save"></i> Save Profile
+                            </button>
+                        </div>
+
+                        <hr style="border:0; border-top:1px solid var(--border-color); margin:30px 0;">
+
+                        <div style="background:rgba(239,68,68,0.05); border:1px solid rgba(239,68,68,0.2);
+                    border-radius:var(--radius-md); padding:16px;">
+                            <h3 style="color:var(--danger); font-size:1.1rem; margin-bottom:8px;">
+                                <i class="fas fa-exclamation-triangle"></i> Danger Zone
+                            </h3>
+                            <p style="font-size:0.9rem; color:var(--text-light); margin-bottom:16px;">
+                                Once you delete your account, there is no going back. Please be certain.
+                            </p>
+                            <button class="btn-auth" onclick="deleteProfileConfirm()"
+                                style="background:var(--danger); font-size:0.9rem; padding:8px 16px; width:auto;">
+                                Delete Account
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Market Ticker -->
+                <div class="market-ticker" id="mandi-ticker">
+                    <div class="ticker-content">
+                        <span>📢 <b>Live Mandi Rates:</b></span>
+                        <span class="up"><i class="fas fa-arrow-up"></i> Wheat: ₹2,125 (+12)</span>
+                        <span class="down"><i class="fas fa-arrow-down"></i> Rice: ₹1,850 (-5)</span>
+                        <span class="up"><i class="fas fa-arrow-up"></i> Potato: ₹1,200 (+20)</span>
+                        <span class="neutral"><i class="fas fa-minus"></i> Tomato: ₹800 (0)</span>
+                        <span class="up"><i class="fas fa-arrow-up"></i> Mustard: ₹5,400 (+45)</span>
+                        <span class="down"><i class="fas fa-arrow-down"></i> Onion: ₹900 (-15)</span>
+                        <span class="up"><i class="fas fa-arrow-up"></i> Sugarcane: ₹3,500 (+30)</span>
+                        <span>📍 Market: <b>OPEN</b></span>
+                    </div>
+                </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="{% static 'js/translations.js' %}?v=8.0"></script>
+    <script src="{% static 'js/offline.js' %}?v=8.0"></script>
+    <script src="{% static 'js/script.js' %}?v=8.0"></script>
+    <script src="{% static 'js/chat.js' %}?v=8.0"></script>
+    <script src="{% static 'js/profile_photo.js' %}?v=8.0"></script>
+    <script src="{% static 'js/mandi-ticker-fixed.js' %}?v=8.0"></script>
+</body>
+
+</html>

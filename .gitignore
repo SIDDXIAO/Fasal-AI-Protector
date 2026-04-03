@@ -1,0 +1,44 @@
+*.pyc
+__pycache__/
+db.sqlite3
+media/
+staticfiles/
+.env
+venv/
+*.log
+
+# AI Models (large files)
+models/*.h5
+models/vector_db/
+
+# Large data files
+UP_Complete_PART1.csv
+UP_Complete_PART2.csv
+UP_Complete_PART3.csv
+*.csv.gz
+
+# Dataset (training images)
+dataset/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+assets/
+node_modules/
+venv/
+__pycache__/
+*.csv
+*.csv
+*.safetensors
+*.pth
+*.pt
+venv/
+__pycache__/
