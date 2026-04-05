@@ -1,10 +1,9 @@
 # 🌱 Fasal AI Protector
 
-![Fasal AI Banner](https://via.placeholder.com/1200x400/00b09b/ffffff?text=Fasal+AI+Protector+-+Smart+Crop+Disease+Detection)
-
-**Fasal AI Protector** is a smart, AI-powered agricultural assistant built to empower farmers with early crop disease detection, localized treatment recommendations, live weather updates, and real-time Mandi (market) rates. 
-
-Built specifically with Indian farmers in mind, it bridges the gap between advanced Deep Learning (Vision Transformers) and accessible, multilingual agricultural advisory.
+<div align="center">
+  <h3>Smart Crop Disease Detection & Farming Assistant</h3>
+  <p>AI-powered disease detection, localized treatment plans, and real-time agricultural data for Indian farmers.</p>
+</div>
 
 ---
 
