@@ -1,6 +1,7 @@
 """
 Plant Disease Detection - ML Service
-ViT model predictions ko XLSX Reference Guide + UP CSV Dataset se match karta hai
+ViT model predictions ko Reference CSV + UP CSV Dataset se match karta hai
+Aur LLM (Gemma-2 / Mistral) ke through smart response generate karta hai.
 """
 try:
     import torch
@@ -9,55 +10,59 @@ try:
 except ImportError:
     HAS_TORCH = False
     print("[WARNING] PyTorch/Transformers not installed. Scanner will return mock results.")
+
 from PIL import Image
 import os
 import re
+import json
+import requests
 import pandas as pd
 from django.conf import settings
 
+# Ollama API URL for local LLMs
+LLM_API_URL = "http://localhost:11434/api/generate"
 
 # ─────────────────────────────────────────────
 # Dataset Loader - App startup par ek baar load
 # ─────────────────────────────────────────────
 
 class DatasetCache:
-    """XLSX aur CSV dono datasets ko memory mein cache karta hai"""
-    _xlsx_df = None
+    """Dono CSV datasets (Reference aur UP Data) ko memory mein cache karta hai"""
+    _ref_df = None
     _csv_df = None
 
     @classmethod
-    def get_xlsx(cls):
-        if cls._xlsx_df is None:
-            # Look at project root (not inside data/ subfolder)
-            xlsx_path = os.path.join(settings.BASE_DIR, "Crop_Wise_LEAF_DISEASE_Reference_Guide.xlsx")
-            if os.path.exists(xlsx_path):
+    def get_reference_csv(cls):
+        """Ab ye Excel ki jagah aapki nayi CSV file ko read karega"""
+        if cls._ref_df is None:
+            ref_path = os.path.join(settings.BASE_DIR, "Crop_Wise_LEAF_DISEASE_Reference_Guide.csv")
+            if os.path.exists(ref_path):
                 try:
-                    df = pd.read_excel(xlsx_path)
-                    # Header rows (emoji wali) ko hata do
+                    df = pd.read_csv(ref_path) # Changed to read_csv
                     df = df[df["Disease Name"].notna()].copy()
-                    # Normalized columns banao matching ke liye
                     df["_crop_norm"] = df["Crop Name"].astype(str).apply(_normalize)
                     df["_disease_norm"] = df["Disease Name"].astype(str).apply(_normalize)
-                    cls._xlsx_df = df
-                    print(f"[OK] XLSX loaded: {len(df)} disease records")
+                    cls._ref_df = df
+                    print(f"[OK] Reference CSV loaded: {len(df)} disease records")
                 except Exception as e:
-                    print(f"[WARN] Error loading XLSX: {e}")
-                    cls._xlsx_df = pd.DataFrame()
+                    print(f"[WARN] Error loading Reference CSV: {e}")
+                    cls._ref_df = pd.DataFrame()
             else:
-                print(f"[WARN] XLSX not found at: {xlsx_path}")
-                cls._xlsx_df = pd.DataFrame()
-        return cls._xlsx_df
+                print(f"[WARN] Reference CSV not found at: {ref_path}")
+                cls._ref_df = pd.DataFrame()
+        return cls._ref_df
 
     @classmethod
     def get_csv(cls):
+        """Ye UP wali teeno files read karega"""
         if cls._csv_df is None:
             dfs = []
             base_dir = settings.BASE_DIR
-            # Try uncompressed CSV files at project root first
             csv_files = [
                 "UP_Complete_PART1.csv",
                 "UP_Complete_PART2.csv",
                 "UP_Complete_PART3.csv",
+                "Crop_Wise_LEAF_DISEASE_Reference_Guide.csv",
             ]
             for filename in csv_files:
                 path = os.path.join(base_dir, filename)
@@ -69,7 +74,6 @@ class DatasetCache:
                     except Exception as e:
                         print(f"[WARN] Error loading {filename}: {e}")
 
-            # Fallback: try gzipped versions in data/ folder
             if not dfs:
                 import gzip
                 data_dir = os.path.join(base_dir, "data")
@@ -89,7 +93,6 @@ class DatasetCache:
 
             if dfs:
                 df = pd.concat(dfs, ignore_index=True)
-                # Deduplicate - same crop+insect ka sirf ek record
                 if "Crop" in df.columns and "Insect_Name" in df.columns:
                     df = df.drop_duplicates(subset=["Crop", "Insect_Name"]).copy()
                     df["_crop_norm"] = df["Crop"].astype(str).apply(_normalize)
@@ -103,7 +106,6 @@ class DatasetCache:
 
 
 def _normalize(text: str) -> str:
-    """Text ko lowercase + sirf alphabets/spaces mein convert karo"""
     text = text.lower()
     text = re.sub(r"[^a-z\s]", " ", text)
     text = re.sub(r"\s+", " ", text).strip()
@@ -111,7 +113,6 @@ def _normalize(text: str) -> str:
 
 
 def _score_match(query_words: list, target: str) -> int:
-    """Kitne query words target mein match hote hain"""
     return sum(1 for w in query_words if w in target)
 
 
@@ -119,44 +120,30 @@ def _score_match(query_words: list, target: str) -> int:
 # Core Matching Logic
 # ─────────────────────────────────────────────
 
-def _match_from_xlsx(crop_norm: str, disease_norm: str) -> dict | None:
-    """
-    XLSX Reference Guide se best matching disease find karo.
-    """
-    df = DatasetCache.get_xlsx()
-    if df.empty:
-        return None
+def _match_from_reference(crop_norm: str, disease_norm: str) -> dict | None:
+    df = DatasetCache.get_reference_csv()
+    if df.empty: return None
 
     disease_words = [w for w in disease_norm.split() if len(w) > 2]
     crop_words = [w for w in crop_norm.split() if len(w) > 2]
 
-    if not disease_words:
-        return None
+    if not disease_words: return None
 
-    # Crop filter
-    def crop_match(row_crop):
-        return any(w in row_crop for w in crop_words)
-
+    def crop_match(row_crop): return any(w in row_crop for w in crop_words)
     crop_matched = df[df["_crop_norm"].apply(crop_match)]
     search_pool = crop_matched if not crop_matched.empty else df
 
-    # Disease score
-    scores = search_pool["_disease_norm"].apply(
-        lambda d: _score_match(disease_words, d)
-    )
+    scores = search_pool["_disease_norm"].apply(lambda d: _score_match(disease_words, d))
 
     if scores.max() == 0:
-        scores = df["_disease_norm"].apply(
-            lambda d: _score_match(disease_words, d)
-        )
-        if scores.max() == 0:
-            return None
+        scores = df["_disease_norm"].apply(lambda d: _score_match(disease_words, d))
+        if scores.max() == 0: return None
         best_row = df.iloc[scores.idxmax()]
     else:
         best_row = search_pool.iloc[scores.idxmax()]
 
     return {
-        "source": "xlsx_reference",
+        "source": "csv_reference",
         "crop": best_row.get("Crop Name", ""),
         "disease_name": best_row.get("Disease Name", ""),
         "hindi_name": best_row.get("Hindi Name", ""),
@@ -172,47 +159,30 @@ def _match_from_xlsx(crop_norm: str, disease_norm: str) -> dict | None:
 
 
 def _match_from_csv(crop_norm: str, disease_norm: str, district: str = None) -> list:
-    """
-    UP CSV Dataset se treatment data lo.
-    """
     df = DatasetCache.get_csv()
-    if df.empty:
-        return []
+    if df.empty: return []
 
     disease_words = [w for w in disease_norm.split() if len(w) > 2]
     crop_words = [w for w in crop_norm.split() if len(w) > 2]
 
-    if not disease_words:
-        return []
+    if not disease_words: return []
 
-    # Step 1: Crop filter
     if crop_words:
         crop_mask = df["_crop_norm"].apply(lambda c: any(w in c for w in crop_words))
         crop_pool = df[crop_mask]
     else:
         crop_pool = df
 
-    if crop_pool.empty:
-        crop_pool = df
+    if crop_pool.empty: crop_pool = df
 
-    # Step 2: District filter (optional)
     if district:
         dist_norm = _normalize(district)
-        dist_mask = crop_pool["District"].astype(str).apply(
-            lambda d: dist_norm in _normalize(d)
-        )
-        if dist_mask.any():
-            crop_pool = crop_pool[dist_mask]
+        dist_mask = crop_pool["District"].astype(str).apply(lambda d: dist_norm in _normalize(d))
+        if dist_mask.any(): crop_pool = crop_pool[dist_mask]
 
-    # Step 3: Disease/insect score
-    scores = crop_pool["_insect_norm"].apply(
-        lambda i: _score_match(disease_words, i)
-    )
+    scores = crop_pool["_insect_norm"].apply(lambda i: _score_match(disease_words, i))
+    if scores.max() == 0: return []
 
-    if scores.max() == 0:
-        return []
-
-    # Top 3 matches
     top_idx = scores.nlargest(3).index
     results = []
     for idx in top_idx:
@@ -233,26 +203,73 @@ def _match_from_csv(crop_norm: str, disease_norm: str, district: str = None) -> 
                 "mrp_2026": row.get("MRP_2026", ""),
                 "application_method": row.get("Application_Method", ""),
             })
-
     return results
 
 
 def get_disease_treatment(crop: str, disease: str, location: str = None) -> dict:
-    """
-    Crop aur disease name se complete treatment information lo.
-    XLSX + CSV dono sources check karta hai.
-    """
     crop_norm = _normalize(crop)
     disease_norm = _normalize(disease)
 
-    xlsx_result = _match_from_xlsx(crop_norm, disease_norm)
+    ref_result = _match_from_reference(crop_norm, disease_norm)
     csv_results = _match_from_csv(crop_norm, disease_norm, district=location)
 
     return {
-        "reference": xlsx_result,
+        "reference": ref_result,
         "treatments": csv_results,
-        "matched": bool(xlsx_result or csv_results),
+        "matched": bool(ref_result or csv_results),
     }
+
+# ─────────────────────────────────────────────
+# LLM Integration (RAG Logic)
+# ─────────────────────────────────────────────
+
+def generate_smart_advice(crop: str, disease: str, is_healthy: bool, dataset_result: dict, location: str) -> str:
+    """LLM ko local data feed karke smart expert advice generate karta hai."""
+    
+    if is_healthy:
+        return f"Badhai ho! Aapki {crop} ki fasal bilkul swasth (Healthy) lag rahi hai. Kripya niyamit roop se khet ki nigrani karte rahein."
+
+    # Dataset matched data ko JSON me convert karo taaki LLM read kar sake
+    local_data = {
+        "reference_guide_info": dataset_result.get("reference"),
+        "district_level_treatments": dataset_result.get("treatments")
+    }
+    local_data_json = json.dumps(local_data, ensure_ascii=False)
+
+    prompt = f"""
+    You are 'Fasal AI', an expert Indian Agricultural Assistant.
+    A farmer from '{location}' uploaded an image of their '{crop}'.
+    Our Vision Model detected the disease/pest: '{disease}'.
+
+    Here is the exact treatment, pesticide, and localized data from our verified UP Database in JSON format:
+    {local_data_json}
+
+    INSTRUCTIONS:
+    1. Write a highly helpful, easy-to-understand response for the farmer.
+    2. Base your treatment advice STRICTLY on the 'verified dataset' provided above. Do not invent pesticides.
+    3. Keep the tone empathetic and respectful. Mention their location ({location}) to make it personalized.
+    4. Provide the solution in clear bullet points (Cause, Chemical Treatment, Organic Treatment).
+    5. Keep it concise and use a mix of Hindi and English (Hinglish) if possible.
+    """
+
+    # Primary Model: Gemma-2
+    try:
+        print("[LLM] Generating advice using Gemma-2...")
+        res = requests.post(LLM_API_URL, json={"model": "gemma2", "prompt": prompt, "stream": False}, timeout=30)
+        res.raise_for_status()
+        return res.json().get('response', '')
+    except Exception as e:
+        print(f"[LLM] Gemma-2 failed: {e}. Switching to Mistral 7B...")
+        
+        # Secondary Model: Mistral
+        try:
+            res = requests.post(LLM_API_URL, json={"model": "mistral", "prompt": prompt, "stream": False}, timeout=30)
+            res.raise_for_status()
+            return res.json().get('response', '')
+        except Exception as e2:
+            print(f"[LLM] Mistral also failed: {e2}")
+            # Fallback text in case both models are offline
+            return "Kshama karein, abhi hamara AI system busy hai. Kripya neeche diye gaye Treatment Cards me dawaiyo ki jaankari dekhein."
 
 
 # ─────────────────────────────────────────────
@@ -260,7 +277,7 @@ def get_disease_treatment(crop: str, disease: str, location: str = None) -> dict
 # ─────────────────────────────────────────────
 
 class PlantDiseaseDetector:
-    """Vision Transformer (ViT) based plant disease detection"""
+    """Vision Transformer (ViT) based plant disease detection with LLM RAG"""
 
     def __init__(self):
         self.model_path = os.path.join(settings.AI_MODEL_PATH, "vit_plant_disease", "best")
@@ -275,8 +292,7 @@ class PlantDiseaseDetector:
         self._load_model()
 
     def _load_model(self):
-        if not HAS_TORCH:
-            return
+        if not HAS_TORCH: return
         try:
             if os.path.exists(self.model_path):
                 print(f"Loading ViT model from {self.model_path}...")
@@ -290,8 +306,8 @@ class PlantDiseaseDetector:
         except Exception as e:
             print(f"[ERROR] Error loading ViT model: {e}")
 
-    def predict(self, img_path: str, top_k: int = 3, user_location: str = None) -> dict:
-        """Plant image analyze karo aur dataset se treatment dhundo."""
+    def predict(self, img_path: str, top_k: int = 3, user_location: str = "Uttar Pradesh") -> dict:
+        """Plant image analyze karo, dataset se data nikalo, aur LLM se advice lo."""
         if not HAS_TORCH or not self.model:
             return self._dummy_prediction("Model not trained or PyTorch not installed.")
 
@@ -319,7 +335,7 @@ class PlantDiseaseDetector:
 
             print(f"ViT Prediction: {predicted_class} (confidence: {confidence:.2%})")
 
-            # Class Name Parse (Format: "Crop___Disease_Name")
+            # Class Name Parse
             parts = predicted_class.split("___")
             if len(parts) == 2:
                 crop = parts[0].replace("_", " ").strip()
@@ -328,14 +344,21 @@ class PlantDiseaseDetector:
                 crop = "Unknown"
                 disease = predicted_class.replace("_", " ").strip()
 
-            is_healthy = any(
-                kw in disease.lower() for kw in ["healthy", "normal", "no disease"]
-            )
+            is_healthy = any(kw in disease.lower() for kw in ["healthy", "normal", "no disease"])
 
-            # Dataset Matching
+            # 1. Dataset Matching
             dataset_result = {"reference": None, "treatments": [], "matched": False}
             if not is_healthy:
                 dataset_result = get_disease_treatment(crop, disease, location=user_location)
+
+            # 2. RAG LLM Integration (Get Smart Advice)
+            llm_advice = generate_smart_advice(
+                crop=crop, 
+                disease=disease, 
+                is_healthy=is_healthy, 
+                dataset_result=dataset_result, 
+                location=user_location
+            )
 
             return {
                 "predictions": top_predictions,
@@ -346,6 +369,7 @@ class PlantDiseaseDetector:
                 "reference_data": dataset_result["reference"],
                 "treatments": dataset_result["treatments"],
                 "dataset_matched": dataset_result["matched"],
+                "llm_expert_advice": llm_advice # Frontend par dikhane ke liye naya parameter
             }
 
         except Exception as e:
@@ -362,6 +386,7 @@ class PlantDiseaseDetector:
             "reference_data": None,
             "treatments": [],
             "dataset_matched": False,
+            "llm_expert_advice": "System currently unavailable."
         }
 
 
