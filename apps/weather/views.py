@@ -7,58 +7,36 @@ import os
 
 
 @require_http_methods(["GET"])
-def current_weather_view(request):
-    """Get current weather with caching"""
-    city = request.GET.get('city', 'Lucknow')
+def get_live_weather(request):
     lat = request.GET.get('lat')
     lon = request.GET.get('lon')
-    
-    # Check cache first (cache for 30 minutes)
-    if lat and lon:
-        cache_key = f'weather_{lat}_{lon}'
-    else:
-        cache_key = f'weather_{city}'
-        
-    cached_data = cache.get(cache_key)
-    if cached_data:
-        return JsonResponse(cached_data)
-    
-    # Try OpenWeatherMap API
-    api_key = os.getenv('OPENWEATHER_API_KEY')
-    
-    if api_key:
-        try:
-            if lat and lon:
-                url = f'https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_key}&units=metric'
-            else:
-                url = f'https://api.openweathermap.org/data/2.5/weather?q={city},IN&appid={api_key}&units=metric'
-                
-            response = requests.get(url, timeout=5)
-            
-            if response.status_code == 200:
-                data = response.json()
-                
-                weather_data = {
-                    'success': True,
-                    'weather': {
-                        'temp': f"{data['main']['temp']:.0f}°C",
-                        'condition': data['weather'][0]['main'],
-                        'description': data['weather'][0]['description'],
-                        'location': data.get('name', city),
-                        'humidity': f"{data['main']['humidity']}%",
-                        'wind': f"{data['wind']['speed']} m/s",
-                        'feels_like': f"{data['main']['feels_like']:.0f}°C",
-                        'pressure': f"{data['main']['pressure']} hPa"
-                    }
-                }
-                
-                # Cache for 30 minutes
-                cache.set(cache_key, weather_data, 1800)
-                return JsonResponse(weather_data)
-        except Exception as e:
-            print(f"Weather API error: {e}")
-            # Fallback will be used
-    
+
+    if not lat or not lon:
+        return JsonResponse({"error": "Latitude and longitude are required"}, status=400)
+
+    # Use metric units for Celsius
+    url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={settings.ab32faed9a5b13b8e43d0714c94549e4}&units=metric"
+
+    try:
+        response = requests.get(url)
+        data = response.json()
+
+        if response.status_code == 200:
+            # Extract only what we need for a clean UI
+            weather_info = {
+                "location": data['name'],
+                "temperature": round(data['main']['temp']), # Round to nearest degree
+                "feels_like": round(data['main']['feels_like']),
+                "description": data['weather'][0]['description'].title(),
+                "icon_code": data['weather'][0]['icon'], 
+                "humidity": data['main']['humidity'],
+                "wind_speed": data['wind']['speed']
+            }
+            return JsonResponse(weather_info)
+        else:
+            return JsonResponse({"error": data.get("message", "Could not fetch weather data")}, status=response.status_code)
+    except Exception as e:
+        return JsonResponse({"error": "Server error occurred while fetching weather."}, status=500)
     # Fallback response
     fallback_data = {
         'success': True,
@@ -94,7 +72,7 @@ def forecast_view(request):
     if cached_data:
         return JsonResponse(cached_data)
     
-    api_key = os.getenv('OPENWEATHER_API_KEY')
+    api_key = os.getenv('ab32faed9a5b13b8e43d0714c94549e4')
     
     if api_key:
         try:

@@ -1,0 +1,47 @@
+<div id="mandi-view" class="view-section">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+        <h2 style="margin:0;">📈 Mandi Rates</h2>
+        <div style="display:flex; gap:8px; align-items:center;">
+            <span id="mandi-last-updated" style="font-size:0.8rem; color:var(--text-light);"></span>
+            <button onclick="refreshMandiRates()" style="background:var(--primary); color:#fff; border:none; padding:8px 16px; border-radius:var(--radius-full); font-size:0.85rem; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                <i class="fas fa-sync-alt" id="mandi-refresh-icon"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
+        <input type="text" id="mandi-search" placeholder="🔍 Search crop..." oninput="filterMandiTable(this.value)" style="padding:8px 14px; border-radius:var(--radius-full); border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-main); font-size:0.9rem; min-width:200px;">
+        <select id="mandi-sort" onchange="sortMandiTable(this.value)" style="padding:8px 14px; border-radius:var(--radius-full); border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-main); font-size:0.9rem;">
+            <option value="name">Sort: A–Z</option>
+            <option value="price-high">Price: High–Low</option>
+            <option value="price-low">Price: Low–High</option>
+            <option value="change">Biggest Change</option>
+        </select>
+    </div>
+
+    <div style="max-width:960px; margin:0 auto;">
+        <div style="overflow-x:auto; background:var(--bg-card); border-radius:var(--radius-lg); border:1px solid var(--border-color);">
+            <table class="mandi-table" style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr style="background:var(--bg-main);">
+                        <th style="padding:14px 16px; text-align:left;">Crop</th>
+                        <th style="padding:14px 16px; text-align:right;">Prev (₹/qtl)</th>
+                        <th style="padding:14px 16px; text-align:right;">Today (₹/qtl)</th>
+                        <th style="padding:14px 16px; text-align:center;">Change</th>
+                        <th style="padding:14px 16px; text-align:center;">Trend</th>
+                    </tr>
+                </thead>
+                <tbody id="mandi-tbody">
+                    <tr>
+                        <td colspan="5" style="text-align:center; padding:40px; color:var(--text-light);">
+                            <i class="fas fa-spinner fa-spin"></i> Loading mandi rates...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p style="font-size:0.75rem; color:var(--text-light); text-align:center; margin-top:12px;">
+            <i class="fas fa-info-circle"></i> Data sourced from Agmarknet / UPASNA. Prices in ₹ per quintal.
+        </p>
+    </div>
+</div>

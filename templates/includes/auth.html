@@ -1,0 +1,98 @@
+{% load static %}
+<div id="login-container">
+    <div class="auth-orb auth-orb-1"></div>
+    <div class="auth-orb auth-orb-2"></div>
+    <div class="auth-orb auth-orb-3"></div>
+    <div class="auth-orb auth-orb-4"></div>
+
+    <div class="auth-particles">
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span><span></span><span></span>
+    </div>
+
+    <div class="auth-card">
+        <div class="auth-logo-section">
+            <div class="auth-logo-ring">
+                <div class="auth-logo-inner">
+                    <img src="{% static 'assets/logo.png' %}" alt="Fasal AI Logo">
+                </div>
+            </div>
+            <h1 class="auth-title">Fasal AI Protector</h1>
+            <p class="auth-subtitle">🌱 AI-Powered Crop Disease Detection</p>
+        </div>
+
+        <div class="auth-tabs">
+            <button class="auth-tab-btn active" id="tab-login" onclick="switchAuthTab('login', this)">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+            <button class="auth-tab-btn" id="tab-signup" onclick="switchAuthTab('signup', this)">
+                <i class="fas fa-user-plus"></i> Sign Up
+            </button>
+            <div class="auth-tab-indicator" id="auth-tab-indicator"></div>
+        </div>
+
+        <div id="login-section" class="auth-form-section" style="display:block;">
+            <div class="input-group">
+                <label><i class="fas fa-user"></i> Username</label>
+                <input type="text" id="login-username" placeholder="Enter your username" autocomplete="username">
+            </div>
+            <div class="input-group">
+                <label><i class="fas fa-lock"></i> Password</label>
+                <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+            </div>
+            <button class="btn-auth" id="login-btn" onclick="handleLogin()">
+                <span class="btn-auth-text"><i class="fas fa-sign-in-alt"></i> Login</span>
+                <span class="btn-auth-shine"></span>
+            </button>
+
+            <div class="auth-features">
+                <div class="auth-feature-chip"><i class="fas fa-leaf"></i> 38+ Diseases</div>
+                <div class="auth-feature-chip"><i class="fas fa-brain"></i> AI Powered</div>
+                <div class="auth-feature-chip"><i class="fas fa-bolt"></i> Instant</div>
+            </div>
+        </div>
+
+        <div id="signup-section" class="auth-form-section" style="display:none;">
+            <div class="input-group">
+                <label><i class="fas fa-user"></i> Full Name</label>
+                <input type="text" id="reg-name" placeholder="Rajesh Kumar" autocomplete="name">
+            </div>
+            <div class="input-group">
+                <label><i class="fas fa-at"></i> Username</label>
+                <input type="text" id="reg-username" placeholder="rajesh_farmer" autocomplete="username">
+            </div>
+            <div class="input-group">
+                <label><i class="fas fa-envelope"></i> Email</label>
+                <input type="email" id="reg-email" placeholder="rajesh@example.com" autocomplete="email">
+            </div>
+            <div class="input-group">
+                <label><i class="fas fa-lock"></i> Password</label>
+                <input type="password" id="reg-password" placeholder="Min 6 characters" autocomplete="new-password">
+            </div>
+            <div class="auth-form-row">
+                <div class="input-group">
+                    <label><i class="fas fa-phone"></i> Phone Number </label>
+                    <input type="tel" id="reg-phone" placeholder="+91 98765 43210">
+                </div>
+            </div>
+            <div class="auth-form-row">
+                <div class="input-group">
+                    <label><i class="fas fa-map-pin"></i> Pincode </label>
+                    <input type="text" id="reg-pincode" placeholder="e.g. 226001" onblur="fetchLocationFromPincode(this.value, 'reg-location')">
+                </div>
+                <div class="input-group">
+                    <label><i class="fas fa-map-marker-alt"></i> Location </label>
+                    <input type="text" id="reg-location" placeholder="Lucknow, UP">
+                </div>
+            </div>
+            <button class="btn-auth" id="signup-btn" onclick="handleSignup()">
+                <span class="btn-auth-text"><i class="fas fa-user-plus"></i> Create Account</span>
+                <span class="btn-auth-shine"></span>
+            </button>
+        </div>
+
+        <div class="auth-footer">
+            <span>🇮🇳</span> Made for Indian Farmers
+        </div>
+    </div>
+</div>

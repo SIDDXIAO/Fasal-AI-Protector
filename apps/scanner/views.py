@@ -1,18 +1,21 @@
+# apps/scanner/views.py
 from django.shortcuts import render
 from django.conf import settings
 from django.http import JsonResponse, StreamingHttpResponse
 from django.views.decorators.http import require_http_methods
 from django.middleware.csrf import get_token
-from .ml_service import detector
-from .models import ScanHistory
-import json
 from django.db.models import Count
 from django.utils import timezone
 import datetime
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
-import os
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+import json
 
+from .ml_service import detector
+from .models import ScanHistory, PlantDisease
+from .utils import scan_leaf_image
 
 def get_csrf_token(request):
     """Return CSRF token for frontend to use in requests"""
@@ -33,7 +36,7 @@ def scanner_api(request):
         file_name = default_storage.save(f"temp/{image.name}", ContentFile(image.read()))
         file_path = default_storage.path(file_name)
 
-        # Predict
+        # Predict using your ML service
         result = detector.predict(file_path, user_location=location)
 
         return JsonResponse(result)
@@ -53,7 +56,7 @@ def scanner_api(request):
 
 @require_http_methods(["POST"])
 def save_scan_view(request):
-    """Save scan result to history"""
+    """Save scan result to history (Manual/Legacy Route)"""
     try:
         data = json.loads(request.body)
 
@@ -62,7 +65,6 @@ def save_scan_view(request):
             return JsonResponse({'success': True, 'skipped': 'User not authenticated'})
 
         # Look up disease FK if name provided
-        from .models import PlantDisease
         disease_obj = None
         disease_name = data.get('disease', '')
         if disease_name and disease_name != 'Unknown':
@@ -91,10 +93,14 @@ def get_analytics_view(request):
     today = timezone.now().date()
     week_start = today - datetime.timedelta(days=6)
 
+    # Filter by user if authenticated, otherwise show all
+    scans_qs = ScanHistory.objects.filter(scanned_at__date__gte=week_start)
+    if request.user.is_authenticated:
+        scans_qs = scans_qs.filter(user=request.user)
+
     # Daily counts
     daily_stats = (
-        ScanHistory.objects
-        .filter(scanned_at__date__gte=week_start)
+        scans_qs
         .values('scanned_at__date')
         .annotate(count=Count('id'))
         .order_by('scanned_at__date')
@@ -110,12 +116,88 @@ def get_analytics_view(request):
             counts[date_idx] = stat['count']
 
     # Total stats
-    total = ScanHistory.objects.count()
-    healthy = ScanHistory.objects.filter(is_healthy=True).count()
+    all_user_scans = ScanHistory.objects.all()
+    if request.user.is_authenticated:
+        all_user_scans = all_user_scans.filter(user=request.user)
+
+    total = all_user_scans.count()
+    healthy = all_user_scans.filter(is_healthy=True).count()
     infected = total - healthy
 
     return JsonResponse({
         'success': True,
         'weekly': {'labels': days, 'data': counts},
         'stats': {'total': total, 'healthy': healthy, 'infected': infected}
+    })
+
+
+@csrf_exempt # Use this if you are testing via Postman without CSRF tokens yet
+def process_leaf_scan(request):
+    """Process scan, save to DB automatically, and return results"""
+    if request.method == 'POST' and request.FILES.get('leaf_image'):
+        # 1. Get the uploaded image
+        uploaded_image = request.FILES['leaf_image']
+        
+        # 2. Pass it to your ML utility function
+        result = scan_leaf_image(uploaded_image)
+        
+        # 3. Automatically save the result to the Database if user is logged in
+        if request.user.is_authenticated:
+            # Try to match the predicted disease name with the PlantDisease table
+            disease_name = result.get('disease_detected', '')
+            disease_obj = None
+            if disease_name:
+                disease_obj = PlantDisease.objects.filter(name__icontains=disease_name).first()
+
+            # Determine healthy status (adjust this logic based on how your ML returns status)
+            is_healthy = False
+            if result.get('status', '').lower() == 'healthy':
+                is_healthy = True
+
+            # Save the record
+            ScanHistory.objects.create(
+                user=request.user,
+                image=uploaded_image, # Save the image file as well
+                disease=disease_obj,
+                is_healthy=is_healthy,
+                confidence=result.get('confidence_score', 0.0),
+                scan_method='upload'
+            )
+            
+        # 4. Return the JSON response to the frontend
+        return JsonResponse(result)
+        
+    return JsonResponse({"error": "Please upload an image via POST request."}, status=400)
+
+
+@login_required
+def get_dashboard_stats(request):
+    """API for the frontend to fetch current user's stats and history"""
+    
+    # Fetch only the logged-in user's scans
+    user_scans = ScanHistory.objects.filter(user=request.user)
+    
+    # Calculate counts
+    total_scans = user_scans.count()
+    healthy_count = user_scans.filter(is_healthy=True).count()
+    infected_count = user_scans.filter(is_healthy=False).count()
+    
+    # Fetch the 10 most recent scans for the history tab
+    recent_scans_qs = user_scans.order_by('-scanned_at')[:10]
+    
+    # Use the `result_json` property defined in your models.py
+    recent_scans = [scan.result_json for scan in recent_scans_qs]
+
+    # Calculate average confidence for "Efficiency" metric
+    avg_confidence = "0%"
+    if total_scans > 0:
+        conf_sum = sum([scan.confidence for scan in user_scans])
+        avg_confidence = f"{round((conf_sum / total_scans) * 100, 1)}%"
+
+    return JsonResponse({
+        "total_scans": total_scans,
+        "healthy_count": healthy_count,
+        "infected_count": infected_count,
+        "efficiency": avg_confidence,
+        "recent_scans": recent_scans
     })

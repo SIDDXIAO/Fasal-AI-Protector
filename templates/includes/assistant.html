@@ -1,0 +1,51 @@
+<div id="assistant-view" class="view-section" style="height: calc(100vh - 120px);">
+    <div class="chat-container modern-chat">
+        <div class="modern-chat-header">
+            <div class="header-title">
+                <div class="bot-avatar">🤖</div>
+                <div>
+                    <h2>Fasal AI</h2>
+                    <span class="status-badge"><i class="fas fa-circle"></i> Online</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="ai-messages" class="modern-chat-messages">
+            <div class="ai-bubble ai-bot-bubble">
+                <div class="message-content-wrapper">
+                    <div class="avatar-icon">🤖</div>
+                    <div class="message-text">
+                        <strong>नमस्ते किसान भाई! / Hello Farmer! 🌾</strong><br><br>
+                        I am <b>Fasal AI</b>, your smart agricultural assistant.<br>
+                        How can I help you today?<br><br>
+                        <div class="topic-suggestions">
+                            <button class="ai-chip" onclick="sendAssistantMsg('गेहूं में कौन सी खाद डालें?')">🌾 Wheat Fertilizer</button>
+                            <button class="ai-chip" onclick="sendAssistantMsg('टमाटर में रोग पहचान और उपाय')">🍅 Tomato Diseases</button>
+                            <button class="ai-chip" onclick="sendAssistantMsg('Best pesticide for potato crop?')">🥔 Potato Pest</button>
+                            <button class="ai-chip" onclick="sendAssistantMsg('Wheat price in mandi today')">💰 Mandi Rates</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="ai-typing" style="display:none; padding: 10px 40px;">
+            <div class="typing-indicator">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+
+        <div class="modern-chat-input-wrapper">
+            <div class="modern-input-box">
+                <button onclick="startAssistantVoice()" class="icon-btn voice-btn" title="Voice Input">
+                    <i class="fas fa-microphone" id="ai-mic-icon"></i>
+                </button>
+                <input type="text" id="ai-input" placeholder="Message Fasal AI..." onkeypress="if(event.key==='Enter') sendAssistantMsg()" autocomplete="off">
+                <button onclick="sendAssistantMsg()" class="icon-btn send-btn" title="Send Message">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+            </div>
+            <div class="chat-footer-text">AI can make mistakes. Verify important agricultural decisions.</div>
+        </div>
+    </div>
+</div>

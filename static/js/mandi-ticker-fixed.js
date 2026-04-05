@@ -257,3 +257,28 @@ document.addEventListener('DOMContentLoaded', () => {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { updateMandiTicker, refreshMandiRates, filterMandiTable, sortMandiTable };
 }
+// Add this to the bottom of your existing template
+function fetchLocationAndRates() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(sendPositionToBackend);
+    } else {
+        console.log("Geolocation is not supported by this browser.");
+    }
+}
+
+function sendPositionToBackend(position) {
+    const lat = position.coords.latitude;
+    const lon = position.coords.longitude;
+
+    // Send silently to your Django backend
+    fetch(`/api/get-mandi-rates/?lat=${lat}&lon=${lon}`)
+    .then(response => response.json())
+    .then(data => {
+        // Inject the data into your existing HTML elements using their IDs
+        // e.g., document.getElementById('mandi-price-display').innerText = data.rates;
+        console.log(data); 
+    });
+}
+
+// Trigger it (e.g., window.onload or attached to an existing 'Scan' button)
+fetchLocationAndRates();

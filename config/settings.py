@@ -150,8 +150,9 @@ CNN_MODEL_PATH = AI_MODEL_PATH / 'plant_disease_cnn.h5'
 # ═══════════════════════════════════════
 # API Keys
 # ═══════════════════════════════════════
-OPENWEATHER_API_KEY = config('OPENWEATHER_API_KEY', default='')
-MANDI_API_KEY = config('MANDI_API_KEY', default='')
+# settings.py
+OPENWEATHER_API_KEY = "your_api_key_here"
+MANDI_API_KEY = config('579b464db66ec23bdd000001de83fc07b14447535ee3b0203e7e5f2e', default='')
 
 # ═══════════════════════════════════════
 # LM Studio / Local LLM Settings
@@ -163,7 +164,7 @@ MISTRAL_AI_BASE_URL = config('MISTRAL_AI_BASE_URL', default='http://localhost:12
 MISTRAL_AI_MODEL = config('MISTRAL_AI_MODEL', default='mistral-7b')
 
 # Gemma 2 9B
-GEMMA_AI_BASE_URL = config('GEMMA_AI_BASE_URL', default='http://localhost:1234')
+GEMMA_AI_BASE_URL = config('GEMMA_AI_BASE_URL', default='http://10.230.82.15:1234')
 GEMMA_AI_MODEL = config('GEMMA_AI_MODEL', default='gemma-2-9b-it')
 
 # ═══════════════════════════════════════

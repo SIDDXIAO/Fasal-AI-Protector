@@ -1,9 +1,7 @@
-"""
-Scanner App Models - Plant Disease Detection
-"""
+# apps/scanner/models.py
 from django.db import models
 from django.conf import settings
-
+from django.contrib.auth.models import User
 
 class PlantDisease(models.Model):
     """Plant disease master data"""
@@ -104,7 +102,6 @@ class ScanHistory(models.Model):
         JSON-serializable result - frontend ko complete data deta hai.
         Reference Guide + Treatment data dono included hain.
         """
-        # XLSX se disease details
         ref = self.reference_data or {}
         ref_detail = {
             "disease_name": ref.get("disease_name", ""),
@@ -121,20 +118,15 @@ class ScanHistory(models.Model):
 
         return {
             'id': self.id,
-            # Basic info
             'disease': self.disease.name if self.disease else ('Healthy Plant' if self.is_healthy else 'Unknown'),
             'is_healthy': self.is_healthy,
             'confidence': round(self.confidence * 100, 2),
             'status': self.status,
             'date': self.scanned_at.strftime('%Y-%m-%d %H:%M'),
-            'image_url': self.image.url if self.image else None,
-
-            # Dataset matched data
+            'image_url': self.image.url if self.image and hasattr(self.image, 'url') else None,
             'dataset_matched': self.dataset_matched,
-            'reference_detail': ref_detail,     # XLSX se disease info
-            'treatments': self.treatments or [],  # CSV se pesticide recommendations
-
-            # Raw ViT predictions
+            'reference_detail': ref_detail,
+            'treatments': self.treatments or [],
             'predictions': self.predictions or [],
         }
 
@@ -147,14 +139,12 @@ class CropInsectData(models.Model):
     season = models.CharField(max_length=50)
     crop = models.CharField(max_length=100)
 
-    # Insect details
     insect_name = models.CharField(max_length=200)
     insect_nickname = models.CharField(max_length=200, blank=True, null=True)
     insect_hindi_name = models.CharField(max_length=200, blank=True, null=True)
     insect_common_name = models.CharField(max_length=200, blank=True, null=True)
     insect_type = models.CharField(max_length=100, blank=True, null=True)
 
-    # Treatment info
     damage_type = models.TextField(blank=True, null=True)
     how_to_recognize = models.TextField(blank=True, null=True)
     best_control_time = models.CharField(max_length=200, blank=True, null=True)

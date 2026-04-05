@@ -1,0 +1,34 @@
+<div id="history-view" class="view-section">
+    <h2 style="margin-bottom:20px;" data-i18n="scanHistory">Scan History</h2>
+    <div class="history-list" id="history-container">
+        <div style="text-align:center; padding:40px; color:var(--text-light);">
+            <i class="fas fa-history" style="font-size:2rem; margin-bottom:12px; display:block;"></i>
+            <p>No scans yet. Start scanning to see history here.</p>
+        </div>
+    </div>
+</div>
+
+<div id="history-modal" class="history-modal" style="display:none;">
+    <div class="history-modal-content">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h2 style="margin:0; font-size:1.2rem;">Scan Details</h2>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <button onclick="exportCurrentScan()" class="modal-export-btn" title="Export as PDF">
+                    <i class="fas fa-file-pdf"></i> Export
+                </button>
+                <button onclick="closeHistoryModal()" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--text-main); padding:4px;">&times;</button>
+            </div>
+        </div>
+        <div style="text-align:center; margin-bottom:20px;">
+            <img id="modal-img" src="" style="max-width:100%; max-height:300px; border-radius:var(--radius-lg); box-shadow:var(--shadow-md);">
+        </div>
+        <div style="background:var(--bg-main); padding:20px; border-radius:var(--radius-lg); margin-bottom:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <h3 id="modal-title" style="margin:0;">Disease Name</h3>
+                <div id="modal-status" class="status-badge">Status</div>
+            </div>
+            <div style="font-size:0.85rem; color:var(--text-light); margin-bottom:16px;" id="modal-date">Date & Time</div>
+            <div id="modal-remedy-container"></div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,119 @@
+{% load static %}
+<div id="dashboard-view" class="view-section active">
+
+    <div id="weather-alert" class="alert-banner">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <i class="fas fa-cloud-showers-heavy" style="font-size:1.3rem;"></i>
+            <div>
+                <strong>Weather Alert:</strong> Heavy rain expected in next 24 hours.
+                <div style="font-size:0.82rem; margin-top:2px;">Delay irrigation and cover harvested crops.</div>
+            </div>
+        </div>
+        <button onclick="document.getElementById('weather-alert').style.display='none'" style="background:none; border:none; color:inherit; cursor:pointer; font-size:1.2rem; padding:4px;">&times;</button>
+    </div>
+
+    <div class="welcome-banner" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px;">
+        <div class="welcome-text">
+            <h1 id="welcome-msg" data-i18n="helloFarmer">Hello, Farmer! 👋</h1>
+            <p data-i18n="farmerOverview">Your smart farm overview.</p>
+            
+            <button onclick="fetchLiveWeather()" style="margin-top: 15px; padding: 8px 16px; border-radius: var(--radius-md); border: none; background: white; color: var(--primary); font-weight: 600; cursor: pointer; box-shadow: var(--shadow-sm);">
+                <i class="fas fa-cloud-sun"></i> Detect Weather Near Me
+            </button>
+        </div>
+        
+        <div id="weather-card" style="display: none; padding: 15px; border-radius: 10px; background: rgba(255,255,255,0.15); backdrop-filter: blur(5px); color: white; border: 1px solid rgba(255,255,255,0.3); min-width: 250px;">
+            <h3 id="w-location" style="margin: 0; font-size: 1.1rem;">Locating...</h3>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <img id="w-icon" src="" alt="Weather Icon" style="width: 60px; height: 60px;">
+                <h1 id="w-temp" style="font-size: 2.2rem; margin: 0;">--°C</h1>
+            </div>
+            <p id="w-desc" style="font-weight: 600; margin-top: 0; text-transform: capitalize;">--</p>
+            <small>Humidity: <span id="w-humidity">--</span>% | Wind: <span id="w-wind">--</span> m/s</small>
+        </div>
+    </div> 
+    <div class="stats-grid" style="margin-top: 24px;">
+        <div class="stat-card">
+            <div class="stat-icon bg-green"><i class="fas fa-leaf"></i></div>
+            <div class="stat-value" id="stat-total">0</div>
+            <div style="color:var(--text-light); font-size:0.85rem;" data-i18n="totalScans">Total Scans</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon bg-green"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-value" id="stat-healthy">0</div>
+            <div style="color:var(--text-light); font-size:0.85rem;" data-i18n="healthyScans">Healthy</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon bg-red"><i class="fas fa-bug"></i></div>
+            <div class="stat-value" id="stat-infected">0</div>
+            <div style="color:var(--text-light); font-size:0.85rem;" data-i18n="infectedScans">Infected</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon bg-orange"><i class="fas fa-flask"></i></div>
+            <div class="stat-value" id="stat-efficiency">—</div>
+            <div style="color:var(--text-light); font-size:0.85rem;" data-i18n="efficiency">Efficiency</div>
+        </div>
+    </div>
+
+    <div class="dashboard-widgets" style="margin-top: 24px;">
+        <div class="chart-box">
+            <h3>📊 Weekly Scan Activity</h3>
+            <div style="position:relative; height:250px; width:100%;"><canvas id="weeklyChart"></canvas></div>
+        </div>
+
+        <div class="chart-box">
+            <h3>🧪 Fertilizer Calculator</h3>
+            <p style="color:var(--text-light); font-size:0.85rem; margin-bottom:14px;">Calculate nutrients (Urea/DAP).</p>
+
+            <div style="margin-bottom:10px;">
+                <label style="font-size:0.82rem; color:var(--text-light); display:block; margin-bottom:4px;">Select Crop</label>
+                <select id="calc-crop" style="width:100%; padding:10px; border-radius:var(--radius-md); border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-main); font-size:0.9rem;">
+                    <optgroup label="Cereals / Grains (अनाज)">
+                        <option value="wheat">Wheat (गेहूं)</option>
+                        <option value="paddy">Paddy (धान)</option>
+                        <option value="bajra">Bajra (बाजरा)</option>
+                        <option value="maize">Maize (मक्का)</option>
+                    </optgroup>
+                    <optgroup label="Cash Crops (नगदी फसलें)">
+                        <option value="sugarcane">Sugarcane (गन्ना)</option>
+                        <option value="mustard">Mustard (सरसों)</option>
+                        <option value="potato">Potato (आलू)</option>
+                        <option value="tomato">Tomato (टमाटर)</option>
+                    </optgroup>
+                    <optgroup label="Vegetables (सब्जियां)">
+                        <option value="brinjal">Brinjal (बैंगन)</option>
+                        <option value="okra">Okra (भिंडी)</option>
+                        <option value="chilli">Chilli (मिर्च)</option>
+                        <option value="cauliflower">Cauliflower (फूलगोभी)</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-bottom:14px;">
+                <div style="flex:1;">
+                    <label style="font-size:0.82rem; color:var(--text-light); display:block; margin-bottom:4px;">Unit</label>
+                    <select id="calc-unit" style="width:100%; padding:10px; border-radius:var(--radius-md); border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-main); font-size:0.9rem;">
+                        <option value="acre">Acre (एकड़)</option>
+                        <option value="bigha">Bigha (बीघा)</option>
+                        <option value="hectare">Hectare (हेक्टेयर)</option>
+                        <option value="dismil" selected>Dismil (डिसमिल)</option>
+                    </select>
+                </div>
+                <div style="flex:1;">
+                    <label id="calc-area-label" style="font-size:0.82rem; color:var(--text-light); display:block; margin-bottom:4px;">Size (in Dismil)</label>
+                    <input type="number" id="calc-area" placeholder="e.g. 50" style="width:100%; padding:10px; border-radius:var(--radius-md); border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-main); font-size:0.9rem;">
+                </div>
+            </div>
+
+            <button class="btn-auth" onclick="calculateFertilizer()" style="background:var(--primary);">Calculate Dose</button>
+
+            <div id="calc-result">
+                <h4 style="color:var(--primary); margin-bottom:8px; font-size:0.9rem; margin-top: 15px;">✅ Recommended Dose:</h4>
+                <div style="display:flex; justify-content:space-between; font-weight:600; font-size:0.95rem;">
+                    <span>⚪ Urea: <span id="res-urea">0</span> kg</span>
+                    <span>🟤 DAP: <span id="res-dap">0</span> kg</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

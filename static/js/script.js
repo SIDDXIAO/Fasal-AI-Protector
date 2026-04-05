@@ -170,8 +170,9 @@ function enterDashboard(user) {
         if (alert) alert.style.display = 'flex';
     }, 1000);
 
-    initCharts();
-    fetchStats();
+    // Initial data fetch
+    loadDashboardData(); 
+    fetchStats(); // Keep this if you have a separate analytics endpoint
 }
 
 async function handleLogout() {
@@ -221,8 +222,57 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // ═══════════════════════════════════════════
-// DASHBOARD
+// DASHBOARD & DATA FETCHING
 // ═══════════════════════════════════════════
+
+// Fetch stats from DB and populate Dashboard + History
+function loadDashboardData() {
+    fetch('/api/dashboard-stats/') 
+        .then(response => {
+            if (!response.ok) throw new Error("Not logged in or server error");
+            return response.json();
+        })
+        .then(data => {
+            // 1. UPDATE DASHBOARD CARDS
+            if(document.getElementById('stat-total')) document.getElementById('stat-total').innerText = data.total_scans;
+            if(document.getElementById('stat-healthy')) document.getElementById('stat-healthy').innerText = data.healthy_count;
+            if(document.getElementById('stat-infected')) document.getElementById('stat-infected').innerText = data.infected_count;
+            if(document.getElementById('stat-efficiency')) document.getElementById('stat-efficiency').innerText = data.efficiency;
+
+            // 2. UPDATE HISTORY TAB
+            const historyContainer = document.getElementById('history-container');
+            
+            if (historyContainer && data.recent_scans && data.recent_scans.length > 0) {
+                historyContainer.innerHTML = ''; // Clear default "No scans yet" message
+                
+                data.recent_scans.forEach(scan => {
+                    // Decide colors based on is_healthy boolean
+                    let statusColor = scan.is_healthy ? '#10b981' : '#ef4444'; // Green or Red
+                    let statusText = scan.is_healthy ? 'Healthy' : 'Infected';
+                    let icon = scan.is_healthy ? 'fa-check-circle' : 'fa-bug';
+                    
+                    // Create formatted remedy data for the modal
+                    let remedyData = scan.is_healthy 
+                        ? JSON.stringify([{ icon: '✅', heading: 'Healthy', points: ['Your crop is in excellent condition'] }])
+                        : JSON.stringify([{ icon: '💊', heading: 'Treatment', points: [
+                            scan.reference_detail ? scan.reference_detail.treatment_options : 'Consult expert',
+                            scan.reference_detail ? scan.reference_detail.how_to_recognize : ''
+                        ] }]);
+
+                    // We use the addToHistory helper to properly attach click events for the modal
+                    addToHistory(
+                        `${scan.disease}`, 
+                        scan.image_url || '/static/assets/placeholder-leaf.png', 
+                        scan.is_healthy ? 'safe' : 'danger', 
+                        remedyData,
+                        scan.date
+                    );
+                });
+            }
+        })
+        .catch(error => console.log("Dashboard data fetch skipped:", error));
+}
+
 
 let chartWeekly, chartTrend, chartHealth;
 let stats = { total: 0, healthy: 0, infected: 0 };
@@ -255,6 +305,11 @@ function showPage(pid) {
                 document.getElementById('prof-location').value = user.location || '';
             } catch (e) {}
         }
+    }
+    
+    // Refresh dashboard data when navigating to dashboard or history
+    if (pid === 'dashboard' || pid === 'history') {
+        loadDashboardData();
     }
 
     if (pid !== 'scanner') stopCamera();
@@ -292,10 +347,11 @@ async function fetchStats() {
         if (data.success) {
             stats = data.stats;
             initCharts(data.weekly);
-            updateStatCards();
+            // updateStatCards() is now handled by loadDashboardData(), but keeping this for safety
+            updateStatCards(); 
         }
     } catch (e) {
-        console.log('Stats fetch skipped:', e.message);
+        console.log('Analytics fetch skipped:', e.message);
     }
 }
 
@@ -305,10 +361,11 @@ function updateStatCards() {
     const infectedEl = document.getElementById('stat-infected');
     const effEl = document.getElementById('stat-efficiency');
 
-    if (totalEl) totalEl.innerText = stats.total.toLocaleString();
-    if (healthyEl) healthyEl.innerText = stats.healthy.toLocaleString();
-    if (infectedEl) infectedEl.innerText = stats.infected.toLocaleString();
-    if (effEl && stats.total > 0) {
+    // Only update if not already updated by loadDashboardData
+    if (totalEl && totalEl.innerText === '0') totalEl.innerText = stats.total.toLocaleString();
+    if (healthyEl && healthyEl.innerText === '0') healthyEl.innerText = stats.healthy.toLocaleString();
+    if (infectedEl && infectedEl.innerText === '0') infectedEl.innerText = stats.infected.toLocaleString();
+    if (effEl && stats.total > 0 && effEl.innerText === '—') {
         effEl.innerText = Math.round((stats.healthy / stats.total) * 100) + '%';
     }
 }
@@ -376,8 +433,6 @@ function initCharts(weeklyData = { labels: [], data: [] }) {
         });
     }
 }
-
-document.addEventListener('DOMContentLoaded', fetchStats);
 
 // ─── Fertilizer Calculator ───
 function calculateFertilizer() {
@@ -527,10 +582,11 @@ async function runPrediction() {
         const res = await fetch(imgElement.src);
         const blob = await res.blob();
         const formData = new FormData();
-        formData.append('image', blob, 'scan.jpg');
+        formData.append('leaf_image', blob, 'scan.jpg'); // Changed to leaf_image to match your view
         formData.append('location', 'Lucknow, UP');
 
-        const apiRes = await fetch('/api/scanner/predict/', {
+        // Note: Using the new process_leaf_scan endpoint which saves automatically
+        const apiRes = await fetch('/api/scanner/process_leaf_scan/', { 
             method: 'POST',
             headers: { 'X-CSRFToken': getCSRFToken() },
             body: formData
@@ -540,11 +596,11 @@ async function runPrediction() {
         const result = await apiRes.json();
         if (result.error) throw new Error(result.error);
 
-        // Parse result
-        const isHealthy = result.is_healthy;
-        const diseaseName = result.top_disease;
-        const cropName = result.top_crop;
-        const confidence = result.confidence;
+        // Parse result (Update these to match the dict returned by your utils.py)
+        const isHealthy = result.status && result.status.toLowerCase() === 'healthy';
+        const diseaseName = result.disease_detected || result.top_disease || 'Unknown';
+        const cropName = result.crop_name || result.top_crop || 'Unknown';
+        const confidence = result.confidence_score || result.confidence || 0;
         const treatments = result.treatments || [];
 
         // Hide placeholder, show result
@@ -614,33 +670,9 @@ async function runPrediction() {
             organicEl.innerText = 'Remove infected parts and improve air circulation.';
         }
 
-        // Save to backend
-        try {
-            await fetch('/api/scanner/save_scan/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCSRFToken()
-                },
-                body: JSON.stringify({
-                    crop: cropName, disease: diseaseName,
-                    confidence: confidence, is_healthy: isHealthy,
-                    predictions: result
-                })
-            });
-        } catch (e) { console.log('Save scan skipped:', e.message); }
+        // REFRESH DB DATA (Updates Dashboard numbers & adds to History automatically)
+        setTimeout(loadDashboardData, 1000); 
 
-        // Add to frontend history
-        const remedyData = isHealthy
-            ? JSON.stringify([{ icon: '✅', heading: 'Healthy', points: ['Your crop is in excellent condition'] }])
-            : JSON.stringify([{ icon: '💊', heading: 'Treatment', points: [remedyEl.innerText, organicEl.innerText] }]);
-
-        addToHistory(
-            isHealthy ? `${cropName} — Healthy` : `${cropName} — ${diseaseName}`,
-            imgElement.src, isHealthy ? 'safe' : 'danger', remedyData
-        );
-
-        fetchStats();
         if (isHealthy) {
             try { confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 }, colors: ['#10b981', '#00b09b', '#96c93d'] }); } catch (e) { }
         }
@@ -684,12 +716,12 @@ function startVoice() {
 }
 
 // ═══════════════════════════════════════════
-// HISTORY
+// HISTORY (MODAL HANDLING)
 // ═══════════════════════════════════════════
 
 let currentModalData = {};
 
-function addToHistory(title, imgSrc, status, remedy) {
+function addToHistory(title, imgSrc, status, remedy, dateStr) {
     const list = document.getElementById('history-container');
     if (!list) return;
 
@@ -699,7 +731,8 @@ function addToHistory(title, imgSrc, status, remedy) {
 
     const card = document.createElement('div');
     card.className = 'history-card';
-    const timestamp = new Date().toLocaleString();
+    // Use the date provided by the DB, or fallback to current time
+    const timestamp = dateStr || new Date().toLocaleString();
 
     card.setAttribute('data-title', title);
     card.setAttribute('data-img', imgSrc);
@@ -708,13 +741,26 @@ function addToHistory(title, imgSrc, status, remedy) {
     card.setAttribute('data-date', timestamp);
 
     const statusText = status === 'safe' ? 'Healthy' : 'Infected';
+    
+    // Create the card with inline styles similar to what we planned
+    card.style.cssText = "background: var(--bg-card); padding: 15px; border-radius: var(--radius-lg); margin-bottom: 12px; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; box-shadow: var(--shadow-sm); cursor:pointer;";
+    
+    let statusColor = status === 'safe' ? '#10b981' : '#ef4444';
+    let icon = status === 'safe' ? 'fa-check-circle' : 'fa-bug';
+
     card.innerHTML = `
-        <img src="${imgSrc}" class="history-img" alt="Scan">
-        <div class="history-info">
-            <div style="font-weight:600; font-size:0.9rem;">${title}</div>
-            <div style="font-size:0.8rem; color:var(--text-light);">${timestamp}</div>
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div style="background: ${statusColor}20; color: ${statusColor}; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                <i class="fas ${icon}"></i>
+            </div>
+            <div>
+                <h4 style="margin: 0; font-size: 1.05rem; color: var(--text-main);">${title}</h4>
+                <span style="font-size: 0.8rem; color: var(--text-light);"><i class="far fa-calendar-alt"></i> ${timestamp}</span>
+            </div>
         </div>
-        <div class="status-badge ${status === 'safe' ? 'status-safe' : 'status-danger'}">${statusText}</div>`;
+        <div style="text-align: right;">
+            <div style="color: ${statusColor}; font-weight: 700; font-size: 0.9rem; text-transform: uppercase;">${statusText}</div>
+        </div>`;
 
     card.onclick = function () {
         openHistoryModal(
@@ -726,7 +772,8 @@ function addToHistory(title, imgSrc, status, remedy) {
         );
     };
 
-    list.insertBefore(card, list.firstChild);
+    // We append instead of insertBefore because the API sends them pre-sorted (newest first)
+    list.appendChild(card);
 }
 
 function openHistoryModal(title, img, status, remedy, date) {

@@ -155,3 +155,42 @@ def available_crops_view(request):
         'crops': crops,
         'count': len(crops)
     })
+
+def get_mandi_rates(request):
+    lat = request.GET.get('lat')
+    lon = request.GET.get('lon')
+    search_query = request.GET.get('search') # For your manual search requirement
+    
+    district = None
+
+    # If coordinates are provided, find the district
+    if lat and lon:
+        headers = {'User-Agent': 'FasalAIProtector/1.0'}
+        geo_url = f"https://nominatim.openstreetmap.org/reverse?format=json&lat={lat}&lon={lon}"
+        geo_response = requests.get(geo_url, headers=headers).json()
+        
+        # Extract the district (usually falls under state_district or county)
+        address = geo_response.get('address', {})
+        district = address.get('state_district', '').replace(' District', '')
+    
+    # If the user used the manual search bar instead of live location
+    if search_query:
+        district = search_query
+
+    # Fetch Mandi rates (Example using a placeholder API/Database query)
+    rates_data = fetch_rates_for_district(district) 
+    
+    return JsonResponse({
+        "location_detected": district,
+        "mandi_rates": rates_data
+    })
+
+def fetch_rates_for_district(district_name):
+    # Here you would either query your own database of rates
+    # OR make a request to the data.gov.in Mandi prices API filtering by state="Uttar Pradesh" and district=district_name
+    
+    # Dummy response structure
+    return [
+        {"crop": "Wheat", "price_per_quintal": 2275, "mandi": f"{district_name} Main Market"},
+        {"crop": "Potato", "price_per_quintal": 1800, "mandi": f"{district_name} Main Market"}
+    ]

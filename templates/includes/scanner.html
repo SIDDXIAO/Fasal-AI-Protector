@@ -1,0 +1,110 @@
+{% load static %}
+<div id="scanner-view" class="view-section">
+    <div class="scanner-pro-container">
+        <div class="scanner-pro-header">
+            <div class="scanner-badge"><i class="fas fa-brain"></i> AI-POWERED DIAGNOSIS</div>
+            <h2>Disease <span class="gradient-text">Scanner</span></h2>
+            <p>Upload a leaf photo — our ViT model identifies 38+ diseases instantly with 92%+ accuracy</p>
+        </div>
+
+        <div class="scanner-pro-grid">
+            <div class="scanner-upload-col">
+                <div class="scan-tabs">
+                    <button class="tab-btn active" onclick="switchScanTab('upload-area', this)"><i class="fas fa-upload"></i> Upload</button>
+                    <button class="tab-btn" onclick="switchScanTab('camera-area', this)"><i class="fas fa-camera"></i> Camera</button>
+                    <button class="tab-btn" onclick="switchScanTab('link-area', this)"><i class="fas fa-link"></i> URL</button>
+                </div>
+
+                <div id="upload-area" class="drop-zone show" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+                    <div id="drop-zone-content">
+                        <div class="drop-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                        <p class="drop-title">Drop leaf image here</p>
+                        <p class="drop-sub">or click to browse (JPG, PNG, WebP)</p>
+                        <label class="drop-browse-btn">
+                            <i class="fas fa-folder-open"></i> Browse Files
+                            <input type="file" id="file-input" accept="image/*" onchange="handleFile(this)" style="display:none;">
+                        </label>
+                        <p class="drop-hint"><i class="fas fa-leaf"></i> Supports 38+ crop disease classes</p>
+                    </div>
+                </div>
+
+                <div id="camera-area" class="input-area">
+                    <video id="video-feed" autoplay playsinline style="display:none;"></video>
+                    <canvas id="canvas" style="display:none;"></canvas>
+                    <button class="btn-auth" onclick="startCamera()" id="start-cam-btn">Start Camera</button>
+                    <button class="btn-auth" onclick="captureImage()" id="capture-btn" style="display:none; background:var(--danger);">Capture</button>
+                </div>
+
+                <div id="link-area" class="input-area">
+                    <input type="text" id="url-input" placeholder="Paste Image URL" style="width:100%; padding:10px; border:1px solid var(--border-color); border-radius:var(--radius-md); background:var(--bg-input); color:var(--text-main);">
+                    <button class="btn-auth" onclick="loadUrl()" style="margin-top:10px;">Load</button>
+                </div>
+
+                <div id="preview-box" style="display:none; margin-top:16px; position:relative;">
+                    <div class="preview-wrapper">
+                        <img id="preview-img" src="" style="width:100%; border-radius:var(--radius-lg); max-height:280px; object-fit:cover;">
+                        <div class="scan-overlay" id="scan-overlay" style="display:none;">
+                            <div class="scan-line"></div>
+                            <div class="scan-spinner-wrap">
+                                <div class="scan-spinner"></div>
+                                <p class="scan-analyzing-text">Analyzing...</p>
+                            </div>
+                        </div>
+                        <button onclick="clearScanPreview()" class="preview-clear-btn"><i class="fas fa-times"></i></button>
+                    </div>
+                    <button class="btn-auth scan-analyze-btn" onclick="runPrediction()" id="predict-btn">
+                        <i class="fas fa-search"></i> Analyze Now
+                    </button>
+                </div>
+            </div>
+
+            <div class="scanner-result-col">
+                <div class="result-placeholder" id="result-placeholder">
+                    <i class="fas fa-leaf"></i>
+                    <p>Upload a leaf image to begin diagnosis</p>
+                    <span style="font-size:0.85rem;">Results will appear here with treatment options</span>
+                </div>
+
+                <div class="result-pro-card" id="result-box" style="display:none;">
+                    <div class="result-disease-header">
+                        <div class="result-disease-icon" id="result-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                        <div>
+                            <h3 id="pest-name">Disease Name</h3>
+                            <p id="result-crop-label" style="color:var(--text-light); font-size:0.85rem;">Crop • Detected</p>
+                        </div>
+                    </div>
+
+                    <div class="confidence-section">
+                        <div class="confidence-label">
+                            <span>Confidence</span>
+                            <span class="confidence-value" id="confidence-value">0%</span>
+                        </div>
+                        <div class="confidence-track">
+                            <div class="confidence-fill" id="confidence-fill"></div>
+                        </div>
+                    </div>
+
+                    <div class="severity-row">
+                        <span style="color:var(--text-light); font-size:0.85rem;">Severity:</span>
+                        <span class="severity-badge" id="severity-badge">Medium</span>
+                    </div>
+
+                    <div class="treatment-cards">
+                        <div class="treatment-card treatment-chemical">
+                            <div class="treatment-card-header"><i class="fas fa-pills"></i><span>Chemical Treatment</span></div>
+                            <p id="remedy">—</p>
+                        </div>
+                        <div class="treatment-card treatment-organic">
+                            <div class="treatment-card-header"><i class="fas fa-seedling"></i><span>Organic Remedy</span></div>
+                            <p id="remedy-organic">—</p>
+                        </div>
+                    </div>
+
+                    <div class="result-footer">
+                        <i class="fas fa-check-circle"></i> Diagnosis powered by ViT Model + Dataset Matching
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
