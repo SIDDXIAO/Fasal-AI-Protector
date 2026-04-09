@@ -41,6 +41,18 @@ def _extract_lang_and_clean(message):
     return message, 'en-IN'
 
 
+def _encode_stream(generator):
+    """
+    Wraps any generator and encodes str chunks to bytes.
+    StreamingHttpResponse requires Iterable[bytes], not str.
+    """
+    for chunk in generator:
+        if isinstance(chunk, bytes):
+            yield chunk
+        elif isinstance(chunk, str):
+            yield chunk.encode('utf-8')
+
+
 @ensure_csrf_cookie
 @require_http_methods(["POST"])
 def assistant_chat_view(request):
@@ -65,9 +77,9 @@ def assistant_chat_view(request):
         # Inject language instruction into the message context
         message_with_lang = f"{lang_instruction}\n\nUser question: {user_message}"
 
-        # Return Streaming Response
+        # Return Streaming Response — encode str → bytes to satisfy Django's type requirement
         return StreamingHttpResponse(
-            assistant.chat_stream(message_with_lang),
+            _encode_stream(assistant.chat_stream(message_with_lang)),
             content_type='text/event-stream'
         )
 

@@ -59,6 +59,11 @@
             </div>
 
             <div class="scanner-result-col">
+                <!-- GPS location badge -->
+                <span id="location-badge" style="display:none;"></span>
+                <!-- Location-based fertilizer + disease info -->
+                <div id="location-info-box" style="display:none;"></div>
+
                 <div class="result-placeholder" id="result-placeholder">
                     <i class="fas fa-leaf"></i>
                     <p>Upload a leaf image to begin diagnosis</p>
@@ -104,7 +109,10 @@
                         <i class="fas fa-check-circle"></i> Diagnosis powered by ViT Model + Dataset Matching
                     </div>
                 </div>
+
+                <!-- LLM advice card appears here after scan -->
+                <div id="llm-advice-box" style="display:none;"></div>
             </div>
         </div>
     </div>
-</div>
+</div>

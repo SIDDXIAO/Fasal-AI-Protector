@@ -561,6 +561,8 @@ function clearScanPreview() {
     document.getElementById('result-placeholder').style.display = 'flex';
     const fi = document.getElementById('file-input');
     if (fi) fi.value = '';
+    // Clear LLM advice card
+    if (window.FasalScan) window.FasalScan.clearAdvice();
 }
 
 async function runPrediction() {
@@ -584,6 +586,9 @@ async function runPrediction() {
         const formData = new FormData();
         formData.append('leaf_image', blob, 'scan.jpg'); // Changed to leaf_image to match your view
         formData.append('location', 'Lucknow, UP');
+        // Inject GPS coordinates if available (from fasal_features.js)
+        if (window._fasalLat) formData.append('lat', window._fasalLat);
+        if (window._fasalLng) formData.append('lng', window._fasalLng);
 
         // Note: Using the new process_leaf_scan endpoint which saves automatically
         const apiRes = await fetch('/api/scanner/process_leaf_scan/', { 
@@ -672,6 +677,11 @@ async function runPrediction() {
 
         // REFRESH DB DATA (Updates Dashboard numbers & adds to History automatically)
         setTimeout(loadDashboardData, 1000); 
+
+        // LLM Advice Card (rendered by fasal_features.js)
+        if (window.FasalScan && (result.llm_advice || result.llm_expert_advice)) {
+            window.FasalScan.renderAdvice(result);
+        }
 
         if (isHealthy) {
             try { confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 }, colors: ['#10b981', '#00b09b', '#96c93d'] }); } catch (e) { }

@@ -7,6 +7,8 @@ from django.middleware.csrf import get_token
 from django.db.models import Count
 from django.utils import timezone
 import datetime
+import os
+import requests as http_requests
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.views.decorators.csrf import csrf_exempt
@@ -201,3 +203,247 @@ def get_dashboard_stats(request):
         "efficiency": avg_confidence,
         "recent_scans": recent_scans
     })
+
+
+# ═══════════════════════════════════════════════════════════════════
+# U.P. RELEASE — NEW ENDPOINTS
+# ═══════════════════════════════════════════════════════════════════
+
+@require_http_methods(["POST"])
+def scan_leaf(request):
+    """
+    Enhanced scan endpoint: runs ViT prediction + enriches with LLM advice.
+    Accepts same FormData as scanner_api (field: 'image').
+    Returns everything scanner_api returns PLUS 'llm_advice'.
+    """
+    file_name = None
+    try:
+        if 'image' not in request.FILES:
+            return JsonResponse({'error': 'No image uploaded'}, status=400)
+
+        image = request.FILES['image']
+        location = request.POST.get('location', 'Uttar Pradesh')
+        lat = request.POST.get('lat', '')
+        lng = request.POST.get('lng', '')
+
+        # Save temp file
+        file_name = default_storage.save(f"temp/{image.name}", ContentFile(image.read()))
+        file_path = default_storage.path(file_name)
+
+        # ViT Prediction
+        result = detector.predict(file_path, user_location=location)
+
+        # LLM enrichment via llm_advisor
+        try:
+            from dataset_loader import get_disease_context
+            from llm_advisor import enrich_scan_response
+
+            predicted_class = f"{result.get('top_crop', 'Unknown')}___{result.get('top_disease', 'Unknown')}"
+            disease_context = get_disease_context(predicted_class, district=location)
+            location_dict = {'district': location, 'lat': lat, 'lng': lng}
+            result = enrich_scan_response(result, disease_context, location_dict)
+        except Exception as llm_err:
+            print(f"[scan_leaf] LLM enrichment skipped: {llm_err}")
+            result['llm_advice'] = result.get('llm_expert_advice', '')
+
+        return JsonResponse(result)
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'error': f"Scan failed: {str(e)}"}, status=500)
+    finally:
+        if file_name and default_storage.exists(file_name):
+            try:
+                default_storage.delete(file_name)
+            except Exception:
+                pass
+
+
+@require_http_methods(["GET"])
+def location_info(request):
+    """
+    GPS → district lookup → fertilizer advice + local disease data.
+
+    Query params:
+        lat    : float  e.g. 26.85
+        lng    : float  e.g. 80.91
+        crop   : str    optional e.g. "Wheat"
+
+    Returns:
+        district, state, fertilizer_tips, common_diseases, season
+    """
+    try:
+        lat = request.GET.get('lat', '')
+        lng = request.GET.get('lng', '')
+        crop = request.GET.get('crop', '')
+
+        if not lat or not lng:
+            return JsonResponse({'error': 'lat and lng are required'}, status=400)
+
+        # Reverse geocode via OpenStreetMap Nominatim (free, no API key)
+        district = 'Unknown'
+        state = 'Uttar Pradesh'
+        try:
+            nominatim_url = (
+                f"https://nominatim.openstreetmap.org/reverse"
+                f"?lat={lat}&lon={lng}&format=json&addressdetails=1"
+            )
+            headers = {'User-Agent': 'FasalAIProtector/1.0'}
+            geo_res = http_requests.get(nominatim_url, headers=headers, timeout=5)
+            if geo_res.ok:
+                addr = geo_res.json().get('address', {})
+                district = (
+                    addr.get('county') or addr.get('district') or
+                    addr.get('city') or addr.get('town') or 'Unknown'
+                )
+                state = addr.get('state', 'Uttar Pradesh')
+        except Exception as geo_err:
+            print(f"[location_info] Nominatim failed: {geo_err}")
+
+        # Fertilizer recommendations per district/crop
+        fertilizer_tips = _get_fertilizer_for_district(district, crop)
+
+        # Common diseases in this district from DatasetCache
+        common_diseases = []
+        try:
+            from dataset_loader import get_local_district_info
+            local_info = get_local_district_info(district)
+            common_diseases = local_info.get('common_diseases', [])[:6]
+        except Exception:
+            pass
+
+        # Current season
+        month = datetime.datetime.now().month
+        if month in [11, 12, 1, 2, 3]:
+            season = 'Rabi (Winter)'
+        elif month in [6, 7, 8, 9, 10]:
+            season = 'Kharif (Monsoon)'
+        else:
+            season = 'Zaid (Summer)'
+
+        return JsonResponse({
+            'success': True,
+            'district': district,
+            'state': state,
+            'lat': lat,
+            'lng': lng,
+            'season': season,
+            'fertilizer_tips': fertilizer_tips,
+            'common_diseases': common_diseases,
+        })
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+def _get_fertilizer_for_district(district: str, crop: str) -> list:
+    """Hardcoded fertilizer recommendations for common U.P. crops."""
+    crop_lower = (crop or '').lower()
+    tips = []
+
+    base = {
+        'wheat':      ['Urea: 120 kg/acre before sowing',  'DAP: 50 kg/acre at sowing',    'Potash: 25 kg/acre if soil test low'],
+        'paddy':      ['Urea: 100 kg/acre split 3 doses',   'DAP: 60 kg in nursery',        'Zinc Sulphate: 25 kg if deficiency'],
+        'sugarcane':  ['Urea: 200 kg/acre in 3 splits',     'DAP: 80 kg at planting',       'Potash: 60 kg/acre'],
+        'mustard':    ['Urea: 60 kg/acre', 'DAP: 40 kg at sowing', 'Sulphur: 20 kg/acre boosts yield'],
+        'potato':     ['DAP: 80 kg/acre', 'Potash: 80 kg/acre', 'Urea: 80 kg in 2 splits'],
+        'maize':      ['Urea: 140 kg/acre in 3 splits', 'DAP: 60 kg at sowing', 'Zinc: 25 kg if deficiency'],
+        'tomato':     ['DAP: 60 kg/acre', 'Urea: 80 kg in splits', 'Potash: 50 kg + micronutrients'],
+        'bajra':      ['Urea: 60 kg/acre', 'DAP: 30 kg at sowing'],
+    }
+
+    for key, vals in base.items():
+        if key in crop_lower:
+            tips = vals
+            break
+
+    if not tips:
+        tips = [
+            'Apply 40-50 kg DAP per acre at sowing',
+            'Apply Urea in 2-3 split doses as per crop stage',
+            'Conduct soil test for best results — contact local KVK',
+        ]
+
+    return tips
+
+
+@require_http_methods(["GET"])
+def mandi_rates(request):
+    """
+    Returns mandi rates from mandi_rates.json, optionally filtered.
+
+    Query params:
+        district : str  optional filter by district
+        crop     : str  optional filter by crop name
+
+    Returns:
+        list of mandi rate objects
+    """
+    try:
+        mandi_path = os.path.join(settings.BASE_DIR, 'mandi_rates.json')
+        if not os.path.exists(mandi_path):
+            return JsonResponse({'error': 'mandi_rates.json not found'}, status=404)
+
+        with open(mandi_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+
+        # data may be a list or dict with a 'rates' key
+        rates = data if isinstance(data, list) else data.get('rates', data.get('data', []))
+
+        district_q = request.GET.get('district', '').lower().strip()
+        crop_q = request.GET.get('crop', '').lower().strip()
+
+        if district_q:
+            rates = [r for r in rates if district_q in str(r.get('district', r.get('market', ''))).lower()]
+        if crop_q:
+            rates = [r for r in rates if crop_q in str(r.get('crop', r.get('commodity', ''))).lower()]
+
+        return JsonResponse({'success': True, 'count': len(rates), 'rates': rates})
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@require_http_methods(["GET"])
+def mandi_search(request):
+    """
+    Full-text search across mandi_rates.json.
+
+    Query params:
+        q : str  search query e.g. "Wheat Agra"
+
+    Returns:
+        filtered list of mandi rate objects (max 50)
+    """
+    try:
+        q = request.GET.get('q', '').lower().strip()
+        if not q:
+            return JsonResponse({'error': 'q parameter required'}, status=400)
+
+        mandi_path = os.path.join(settings.BASE_DIR, 'mandi_rates.json')
+        if not os.path.exists(mandi_path):
+            return JsonResponse({'error': 'mandi_rates.json not found'}, status=404)
+
+        with open(mandi_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+
+        rates = data if isinstance(data, list) else data.get('rates', data.get('data', []))
+
+        # Score each entry by how many query words it matches
+        words = q.split()
+        scored = []
+        for r in rates:
+            haystack = json.dumps(r, ensure_ascii=False).lower()
+            score = sum(1 for w in words if w in haystack)
+            if score > 0:
+                scored.append((score, r))
+
+        scored.sort(key=lambda x: x[0], reverse=True)
+        results = [r for _, r in scored[:50]]
+
+        return JsonResponse({'success': True, 'count': len(results), 'rates': results, 'query': q})
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
