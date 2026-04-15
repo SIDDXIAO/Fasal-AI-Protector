@@ -151,8 +151,8 @@ CNN_MODEL_PATH = AI_MODEL_PATH / 'plant_disease_cnn.h5'
 # API Keys
 # ═══════════════════════════════════════
 # settings.py
-OPENWEATHER_API_KEY = "your_api_key_here"
-MANDI_API_KEY = config('579b464db66ec23bdd000001de83fc07b14447535ee3b0203e7e5f2e', default='')
+OPENWEATHER_API_KEY = config('OPENWEATHER_API_KEY', default='your_api_key_here')
+MANDI_API_KEY = config('MANDI_API_KEY', default='579b464db66ec23bdd000001de83fc07b14447535ee3b0203e7e5f2e')
 
 # ═══════════════════════════════════════
 # LM Studio / Local LLM Settings

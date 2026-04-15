@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Fetch stats from DB and populate Dashboard + History
 function loadDashboardData() {
-    fetch('/api/dashboard-stats/') 
+    fetch('/api/scanner/dashboard-stats/') 
         .then(response => {
             if (!response.ok) throw new Error("Not logged in or server error");
             return response.json();
@@ -601,11 +601,12 @@ async function runPrediction() {
         const result = await apiRes.json();
         if (result.error) throw new Error(result.error);
 
-        // Parse result (Update these to match the dict returned by your utils.py)
-        const isHealthy = result.status && result.status.toLowerCase() === 'healthy';
-        const diseaseName = result.disease_detected || result.top_disease || 'Unknown';
-        const cropName = result.crop_name || result.top_crop || 'Unknown';
-        const confidence = result.confidence_score || result.confidence || 0;
+        // Parse result — matches ml_service.py detector.predict() output
+        const isHealthy = result.is_healthy === true;
+        const diseaseName = result.top_disease || result.disease_detected || 'Unknown';
+        const cropName = result.top_crop || result.crop_name || 'Unknown';
+        const confidence = result.confidence || result.confidence_score || 0;
+        const llmAdvice = result.llm_expert_advice || result.llm_advice || '';
         const treatments = result.treatments || [];
 
         // Hide placeholder, show result
@@ -679,7 +680,7 @@ async function runPrediction() {
         setTimeout(loadDashboardData, 1000); 
 
         // LLM Advice Card (rendered by fasal_features.js)
-        if (window.FasalScan && (result.llm_advice || result.llm_expert_advice)) {
+        if (window.FasalScan && llmAdvice) {
             window.FasalScan.renderAdvice(result);
         }
 
