@@ -5,7 +5,7 @@
                 <div class="bot-avatar">🤖</div>
                 <div>
                     <h2>Fasal AI</h2>
-                    <span class="status-badge"><i class="fas fa-circle"></i> Online</span>
+                    <span class="status-badge" id="ai-status-badge"><i class="fas fa-circle" style="color:#00b09b;"></i> Online</span>
                 </div>
             </div>
         </div>
@@ -15,14 +15,14 @@
                 <div class="message-content-wrapper">
                     <div class="avatar-icon">🤖</div>
                     <div class="message-text">
-                        <strong>नमस्ते किसान भाई! / Hello Farmer! 🌾</strong><br><br>
-                        I am <b>Fasal AI</b>, your smart agricultural assistant.<br>
-                        How can I help you today?<br><br>
+                        <strong>नमस्ते <span class="ai-user-name">किसान भाई</span>! / Hello <span class="ai-user-name-en">Farmer</span>! 🌾</strong><br><br>
+                        Main <b>Fasal AI</b> hoon, aapka smart agricultural assistant.<br>
+                        Aaj main aapki kya madad kar sakta hoon?<br><br>
+                        
                         <div class="topic-suggestions">
-                            <button class="ai-chip" onclick="sendAssistantMsg('गेहूं में कौन सी खाद डालें?')">🌾 Wheat Fertilizer</button>
-                            <button class="ai-chip" onclick="sendAssistantMsg('टमाटर में रोग पहचान और उपाय')">🍅 Tomato Diseases</button>
-                            <button class="ai-chip" onclick="sendAssistantMsg('Best pesticide for potato crop?')">🥔 Potato Pest</button>
-                            <button class="ai-chip" onclick="sendAssistantMsg('Wheat price in mandi today')">💰 Mandi Rates</button>
+                            <button class="ai-chip" onclick="sendAssistantMsg('गेहूं में कौन सी खाद डालें?')">🌾 गेहूं में कौन सी खाद डालें?</button>
+                            <button class="ai-chip" onclick="sendAssistantMsg('Tamatar me rog ki pehchan aur upay batao')">🍅 Tamatar me rog aur upay</button>
+                            <button class="ai-chip" onclick="sendAssistantMsg('What are the Mandi rates today?')">💰 Today's Mandi Rates</button>
                         </div>
                     </div>
                 </div>
@@ -36,16 +36,56 @@
         </div>
 
         <div class="modern-chat-input-wrapper">
-            <div class="modern-input-box">
-                <button onclick="startAssistantVoice()" class="icon-btn voice-btn" title="Voice Input">
+            <div class="modern-input-box inline-mic-box">
+                <input type="text" id="ai-input" placeholder="Message Fasal AI..." onkeypress="if(event.key==='Enter') sendAssistantMsg()" autocomplete="off">
+                
+                <button onclick="openVoiceDashboard()" class="icon-btn voice-btn" title="Advanced Voice Input">
                     <i class="fas fa-microphone" id="ai-mic-icon"></i>
                 </button>
-                <input type="text" id="ai-input" placeholder="Message Fasal AI..." onkeypress="if(event.key==='Enter') sendAssistantMsg()" autocomplete="off">
+                
                 <button onclick="sendAssistantMsg()" class="icon-btn send-btn" title="Send Message">
-                    <i class="fas fa-arrow-up"></i>
+                    <i class="fas fa-paper-plane"></i>
                 </button>
             </div>
-            <div class="chat-footer-text">AI can make mistakes. Verify important agricultural decisions.</div>
+            <div class="chat-footer-text" style="margin-top: 8px; font-size: 0.8rem; color: #888;">AI can make mistakes. Verify important agricultural decisions.</div>
+        </div>
+    </div>
+</div>
+
+<div id="voice-dashboard-modal" class="voice-modal-overlay" style="display: none;">
+    <div class="voice-dashboard">
+        <button class="close-modal-btn" onclick="closeVoiceDashboard()"><i class="fas fa-times"></i></button>
+        
+        <div class="display-screen">
+            <div class="waveform" id="waveform-icon">
+                <i class="fas fa-grip-lines-vertical"></i>
+            </div>
+            <div class="voice-text" id="voice-display-text">
+                नमस्ते! मैं आपका वॉइस असिस्टेंट हूँ। आप जो भी बोलेंगे, मैं उसे टाइप कर दूंगा।
+            </div>
+        </div>
+
+        <div class="voice-actions">
+            <button id="btn-listen" onclick="toggleDashboardListening()">Start Listening</button>
+            <button id="btn-test-voice" onclick="testDashboardVoice()">Test Voice</button>
+            <button id="btn-send-chat" onclick="sendVoiceToChat()">Send to Chat</button>
+        </div>
+
+        <div class="voice-controls">
+            <div class="control-row">
+                <label>Voice Selection</label>
+                <select id="voice-select" class="modern-select"></select>
+            </div>
+            <div class="control-row">
+                <label>Speed Rate</label>
+                <input type="range" id="rate-slider" min="0.5" max="2" step="0.1" value="1" oninput="document.getElementById('rate-val').innerText = this.value">
+                <span class="val-box" id="rate-val">1.0</span>
+            </div>
+            <div class="control-row">
+                <label>Voice Pitch</label>
+                <input type="range" id="pitch-slider" min="0" max="2" step="0.1" value="1" oninput="document.getElementById('pitch-val').innerText = this.value">
+                <span class="val-box" id="pitch-val">1.0</span>
+            </div>
         </div>
     </div>
 </div>

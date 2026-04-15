@@ -20,8 +20,7 @@ import pandas as pd
 from django.conf import settings
 
 # Ollama API URL for local LLMs
-LLM_API_URL = "http://localhost:11434/api/generate"
-
+GEMMA_AI_BASE_URL="http://192.168.1.24:1234"
 # ─────────────────────────────────────────────
 # Dataset Loader - App startup par ek baar load
 # ─────────────────────────────────────────────

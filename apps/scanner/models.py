@@ -1,7 +1,6 @@
 # apps/scanner/models.py
 from django.db import models
 from django.conf import settings
-from django.contrib.auth.models import User
 
 class PlantDisease(models.Model):
     """Plant disease master data"""
@@ -32,105 +31,21 @@ class PlantDisease(models.Model):
 
 
 class ScanHistory(models.Model):
-    """User scan history"""
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='scans')
-    image = models.ImageField(upload_to='scans/%Y/%m/', blank=True, null=True)
-
-    # Detection results
-    disease = models.ForeignKey(PlantDisease, on_delete=models.SET_NULL, null=True, blank=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='scans/', null=True, blank=True)
+    
+    # Store the results from your ML Service
+    disease_name = models.CharField(max_length=255, null=True, blank=True) 
     is_healthy = models.BooleanField(default=False)
-    confidence = models.FloatField(default=0.0)
-
-    # ViT raw predictions (top-k labels + scores)
-    predictions = models.JSONField(blank=True, null=True)
-
-    # XLSX Reference Guide se matched disease data
-    reference_data = models.JSONField(
-        blank=True,
-        null=True,
-        help_text="Crop_Wise_LEAF_DISEASE_Reference_Guide.xlsx se matched disease info"
-    )
-
-    # UP CSV Dataset se matched treatment/pesticide data
-    treatments = models.JSONField(
-        blank=True,
-        null=True,
-        help_text="UP_Complete CSV dataset se matched pesticide/treatment records"
-    )
-
-    # Dataset match hua ya nahi (debugging ke liye useful)
-    dataset_matched = models.BooleanField(default=False)
-
-    # Metadata
-    scan_method = models.CharField(max_length=20, choices=[
-        ('camera', 'Camera'),
-        ('upload', 'Upload'),
-    ], default='upload')
-
-    location = models.CharField(
-        max_length=200,
-        blank=True,
-        null=True,
-        help_text="User ka district - UP CSV data filter ke liye use hota hai"
-    )
-    notes = models.TextField(blank=True, null=True)
-
-    # Timestamps
+    
+    # Stores the confidence score (used for efficiency)
+    confidence_score = models.FloatField(default=0.0) 
+    
+    # Automatically saves the date and time of the scan
     scanned_at = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        db_table = 'scan_history'
-        ordering = ['-scanned_at']
-        verbose_name = 'Scan History'
-        verbose_name_plural = 'Scan Histories'
-
     def __str__(self):
-        if self.is_healthy:
-            status = "Healthy"
-        else:
-            disease_name = self.disease.name if self.disease else 'Unknown'
-            status = f"Infected - {disease_name}"
-        return f"{self.user.username} - {status} ({self.scanned_at.strftime('%Y-%m-%d')})"
-
-    @property
-    def status(self):
-        return 'safe' if self.is_healthy else 'danger'
-
-    @property
-    def result_json(self):
-        """
-        JSON-serializable result - frontend ko complete data deta hai.
-        Reference Guide + Treatment data dono included hain.
-        """
-        ref = self.reference_data or {}
-        ref_detail = {
-            "disease_name": ref.get("disease_name", ""),
-            "hindi_name": ref.get("hindi_name", ""),
-            "local_name": ref.get("local_name", ""),
-            "type": ref.get("type", ""),
-            "damage_description": ref.get("damage_description", ""),
-            "how_to_recognize": ref.get("how_to_recognize", ""),
-            "best_control_time": ref.get("best_control_time", ""),
-            "treatment_options": ref.get("treatment_options", ""),
-            "mrp_2026": ref.get("mrp_2026", ""),
-            "season": ref.get("season", ""),
-        } if ref else None
-
-        return {
-            'id': self.id,
-            'disease': self.disease.name if self.disease else ('Healthy Plant' if self.is_healthy else 'Unknown'),
-            'is_healthy': self.is_healthy,
-            'confidence': round(self.confidence * 100, 2),
-            'status': self.status,
-            'date': self.scanned_at.strftime('%Y-%m-%d %H:%M'),
-            'image_url': self.image.url if self.image and hasattr(self.image, 'url') else None,
-            'dataset_matched': self.dataset_matched,
-            'reference_detail': ref_detail,
-            'treatments': self.treatments or [],
-            'predictions': self.predictions or [],
-        }
-
-
+        return f"{self.user.username} | {self.disease_name} | {self.scanned_at.strftime('%Y-%m-%d')}"
 class CropInsectData(models.Model):
     """Crop-Insect database from uploaded CSV"""
     district = models.CharField(max_length=100)

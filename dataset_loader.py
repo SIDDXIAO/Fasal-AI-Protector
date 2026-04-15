@@ -1,19 +1,3 @@
-"""
-dataset_loader.py — Fasal AI Protector
-U.P. Release Context Builder
-
-Reuses ml_service.DatasetCache (already loaded at app startup) to build
-a compact JSON context string for LLM prompts without re-reading 800MB CSVs.
-
-Usage:
-    from dataset_loader import get_disease_context, vit_result_to_json
-    context = get_disease_context("Tomato___Late_blight", "Lucknow")
-    # → compact dict with reference + district treatments for LLM
-
-CLI test:
-    python dataset_loader.py "Tomato___Late_blight" "Lucknow"
-"""
-
 import json
 import sys
 import os
@@ -37,17 +21,6 @@ from apps.scanner.ml_service import (
 # ─── Core Functions ───────────────────────────────────────────────────────────
 
 def vit_result_to_json(predicted_class: str, confidence: float, top_k: list = None) -> dict:
-    """
-    Standardises a ViT model output into a clean JSON-serialisable dict.
-
-    Args:
-        predicted_class : str   e.g. "Tomato___Late_blight"
-        confidence      : float e.g. 0.94
-        top_k           : list  optional, e.g. [("Tomato___Early_blight", 0.04), ...]
-
-    Returns:
-        dict with keys: predicted_class, crop, disease, confidence, is_healthy, top_k
-    """
     parts = predicted_class.split("___")
     if len(parts) == 2:
         crop = parts[0].replace("_", " ").strip()
@@ -77,17 +50,6 @@ def vit_result_to_json(predicted_class: str, confidence: float, top_k: list = No
 
 
 def get_disease_context(predicted_class: str, district: str = None) -> dict:
-    """
-    Matches a ViT predicted_class against Reference CSV and UP district CSV.
-    Returns a compact context dict suitable for passing to the LLM.
-
-    Args:
-        predicted_class : str  e.g. "Tomato___Late_blight"
-        district        : str  optional e.g. "Lucknow"
-
-    Returns:
-        dict with keys: crop, disease, is_healthy, reference, treatments, context_summary
-    """
     vit_json = vit_result_to_json(predicted_class, 0.0)
     crop = vit_json["crop"]
     disease = vit_json["disease"]
