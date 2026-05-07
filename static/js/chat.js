@@ -1,6 +1,11 @@
 /* ═══════════════════════════════════════════
+<<<<<<< HEAD
     AI ASSISTANT — Chat & Voice Dashboard Script
     ═══════════════════════════════════════════ */
+=======
+   AI ASSISTANT — Chat & Voice Dashboard Script
+   ═══════════════════════════════════════════ */
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 
 document.addEventListener('DOMContentLoaded', () => {
     const savedUser = localStorage.getItem('agriUser');
@@ -14,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (enNameSpan) enNameSpan.innerText = firstName;
         } catch(e) { console.error("Name fetch error:", e); }
     }
+<<<<<<< HEAD
     initChatVoiceInput();
 });
 
@@ -116,6 +122,15 @@ function stopChatVoiceInput() {
         micBtn.innerHTML = '<i class="fas fa-microphone"></i>';
     }
     if (input) input.placeholder = 'Ask about farming, crops, fertilizers...';
+=======
+});
+
+function detectLanguage(text) {
+    if (/[\u0900-\u097F]/.test(text)) return 'hi-IN'; 
+    if (/[\u0A00-\u0A7F]/.test(text)) return 'pa-IN';  
+    if (/[\u0980-\u09FF]/.test(text)) return 'bn-IN'; 
+    return 'en-IN'; 
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 }
 
 // ─── CHAT LOGIC ───
@@ -182,6 +197,7 @@ async function sendAssistantMsg(presetMsg) {
 
 function updateAiStatus(online) {
     const badge = document.getElementById('ai-status-badge');
+<<<<<<< HEAD
     if (badge) {
         badge.innerHTML = online
             ? '<i class="fas fa-circle" style="color:#00b09b; font-size: 0.7rem;"></i> <span style="font-size: 0.8rem;">Online</span>'
@@ -193,6 +209,9 @@ function updateAiStatus(online) {
     if (statusText) {
         statusText.textContent = online ? 'Connected to AI' : 'AI Offline - Using fallback';
     }
+=======
+    if (badge) badge.innerHTML = online ? '<i class="fas fa-circle" style="color:#00b09b;"></i> Online' : '<i class="fas fa-circle" style="color:#ff4444;"></i> Offline';
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 }
 
 function appendAiMessage(text, role, addActions = false, lang = 'en-IN') {
@@ -239,6 +258,7 @@ function addMessageActions(bubble, text, lang) {
 }
 
 // ─── CHAT HELPERS ───
+<<<<<<< HEAD
 let currentUtterance = null;
 let isSpeaking = false;
 
@@ -315,6 +335,15 @@ function updateListenButtonState(speaking) {
             // Restore original playTTS - will be set when message is created
         }
     });
+=======
+function playTTS(text, langCode) {
+    window.speechSynthesis.cancel(); 
+    const utterance = new SpeechSynthesisUtterance(text.replace(/[*#]/g, '').trim());
+    utterance.lang = langCode || 'hi-IN'; utterance.rate = 1.0; 
+    const optimalVoice = window.speechSynthesis.getVoices().find(v => v.lang.includes(utterance.lang.split('-')[0]) && v.name.includes('Online'));
+    if(optimalVoice) utterance.voice = optimalVoice;
+    window.speechSynthesis.speak(utterance);
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 }
 
 function exportToDocx(text) {

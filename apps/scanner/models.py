@@ -36,16 +36,22 @@ class ScanHistory(models.Model):
     
     # Store the results from your ML Service
     disease_name = models.CharField(max_length=255, null=True, blank=True) 
+<<<<<<< HEAD
     crop_name = models.CharField(max_length=255, null=True, blank=True)
+=======
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
     is_healthy = models.BooleanField(default=False)
     
     # Stores the confidence score (used for efficiency)
     confidence_score = models.FloatField(default=0.0) 
     
+<<<<<<< HEAD
     # Stores severity and treatment details
     severity = models.CharField(max_length=50, null=True, blank=True)
     remedy_data = models.JSONField(null=True, blank=True)
     
+=======
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
     # Automatically saves the date and time of the scan
     scanned_at = models.DateTimeField(auto_now_add=True)
 

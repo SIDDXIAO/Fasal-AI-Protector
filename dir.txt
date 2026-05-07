@@ -1,0 +1,40 @@
+ Volume in drive C has no label.
+ Volume Serial Number is 9875-54F9
+
+ Directory of c:\Users\siddh\Desktop\web1\Fasal AI Protector
+
+02-04-2026  21:50    <DIR>          .
+30-03-2026  21:31    <DIR>          ..
+31-03-2026  11:23               807 .env
+30-03-2026  22:01               493 .env.example
+30-03-2026  22:05               349 .gitignore
+30-03-2026  21:31    <DIR>          apps
+30-03-2026  21:31    <DIR>          config
+12-03-2026  01:05             1,348 crops.json
+15-02-2026  14:24            13,753 Crop_Wise_LEAF_DISEASE_Reference_Guide.xlsx
+30-03-2026  21:37    <DIR>          dataset
+17-02-2026  11:26               625 data_columns.json
+31-03-2026  11:52           176,128 db.sqlite3
+02-04-2026  21:50               175 dir.txt
+08-02-2026  17:25               353 manage.py
+31-03-2026  12:27            48,695 mandi_error.png
+31-03-2026  12:28             1,447 mandi_rates.json
+31-03-2026  11:47             6,301 mandi_scraper.js
+31-03-2026  12:26             5,830 mandi_scraper.py
+30-03-2026  21:37    <DIR>          media
+30-03-2026  21:37    <DIR>          models
+26-03-2026  16:48               239 pyrightconfig.json
+17-02-2026  12:02             5,164 README.pdf
+30-03-2026  22:05               712 requirements.txt
+15-02-2026  15:53             5,649 SETUP_GUIDE.md
+30-03-2026  22:06    <DIR>          static
+30-03-2026  21:37    <DIR>          templates
+15-02-2026  17:07               562 test_image.jpg
+06-02-2026  12:28       796,477,323 UP_Complete_PART1.csv
+06-02-2026  12:28       796,659,411 UP_Complete_PART2.csv
+06-02-2026  12:29       796,705,433 UP_Complete_PART3.csv
+30-03-2026  21:44    <DIR>          venv
+17-02-2026  17:57            13,299 vit_training.py
+30-03-2026  21:44    <DIR>          zip_analysis
+              22 File(s)  2,390,124,096 bytes
+              11 Dir(s)  216,955,408,384 bytes free

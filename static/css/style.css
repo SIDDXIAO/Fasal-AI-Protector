@@ -138,7 +138,11 @@ img { max-width: 100%; height: auto; }
    AUTH SCREEN — Premium Glassmorphism
    ═══════════════════════════════════════════ */
 #login-container {
+<<<<<<< HEAD
   display: none;
+=======
+  display: flex;
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
   align-items: center;
   justify-content: center;
   min-height: 100vh;
@@ -655,10 +659,15 @@ img { max-width: 100%; height: auto; }
 .main-content {
   margin-left: var(--sidebar-width);
   width: calc(100% - var(--sidebar-width));
+<<<<<<< HEAD
   height: 100vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+=======
+  min-height: 100vh;
+  flex: 1;
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
   transition: margin-left var(--transition-base), width var(--transition-base);
 }
 
@@ -710,6 +719,7 @@ header h2 {
 }
 
 /* ─── View Sections ─── */
+<<<<<<< HEAD
 .view-section {
   display: none;
   animation: fadeIn 0.3s ease;
@@ -725,6 +735,10 @@ header h2 {
   display: flex;
   flex-direction: column;
 }
+=======
+.view-section { display: none; animation: fadeIn 0.3s ease; }
+.view-section.active { display: block; }
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
@@ -1139,18 +1153,32 @@ header h2 {
 .scan-line {
   position: absolute;
   top: 0;
+<<<<<<< HEAD
   left: 5%;
   right: 5%;
   height: 4px;
   background: linear-gradient(90deg, transparent, var(--primary), transparent);
   box-shadow: 0 0 20px var(--primary), 0 0 40px var(--primary);
+=======
+  left: 10%;
+  right: 10%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  box-shadow: 0 0 15px var(--primary);
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
   animation: scanMove 2s ease-in-out infinite;
 }
 
 @keyframes scanMove {
+<<<<<<< HEAD
   0% { top: 0%; }
   50% { top: calc(100% - 4px); }
   100% { top: 0%; }
+=======
+  0% { top: 5%; }
+  50% { top: 90%; }
+  100% { top: 5%; }
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 }
 
 .scan-spinner-wrap {
@@ -1352,6 +1380,7 @@ header h2 {
 }
 
 .history-card:hover {
+<<<<<<< HEAD
     transform: translateX(6px);
     box-shadow: var(--shadow-md);
     border-color: var(--primary);
@@ -1375,6 +1404,11 @@ header h2 {
 #history-actions button.active {
     opacity: 1;
     pointer-events: auto;
+=======
+  transform: translateX(6px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary);
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 }
 
 .history-img {
@@ -1812,6 +1846,7 @@ header h2 {
   .main-content {
     margin-left: 0 !important;
   }
+<<<<<<< HEAD
 }
 
 /* ═══════════════════════════════════════════
@@ -2324,4 +2359,6 @@ header h2 {
   align-items: center;
   gap: 8px;
 }
+=======
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 }

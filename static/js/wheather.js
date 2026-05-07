@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 let weatherDataCache = null;
 
+=======
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 function fetchLiveWeather() {
     if (navigator.geolocation) {
         document.getElementById('weather-card').style.display = 'block';
@@ -25,8 +28,11 @@ function sendToDjango(position) {
                 return;
             }
 
+<<<<<<< HEAD
             weatherDataCache = data;
 
+=======
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
             // Populate weather card
             document.getElementById('w-location').innerText = data.location;
             document.getElementById('w-temp').innerText = data.temperature + "°C";
@@ -41,6 +47,7 @@ function sendToDjango(position) {
         .catch(error => console.error('Weather fetch error:', error));
 }
 
+<<<<<<< HEAD
 function showWeatherDashboard() {
     if (!weatherDataCache) {
         alert("Please click 'Live Weather' first to fetch weather data.");
@@ -108,6 +115,8 @@ function closeWeatherDashboard() {
     document.getElementById('weather-dashboard-modal').style.display = 'none';
 }
 
+=======
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 function updateWeatherAlert(data) {
     const alertBox = document.getElementById('weather-alert');
     if (!alertBox) return;
@@ -190,8 +199,12 @@ function handleGeoError(error) {
 // Hide alert on page load — only show after real weather is fetched
 document.addEventListener('DOMContentLoaded', function() {
     const alertBox = document.getElementById('weather-alert');
+<<<<<<< HEAD
     if (alertBox) {
         alertBox.style.display = 'none';
         alertBox.innerHTML = '';
     }
+=======
+    if (alertBox) alertBox.style.display = 'none';
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 });

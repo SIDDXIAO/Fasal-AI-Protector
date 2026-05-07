@@ -3,8 +3,14 @@ llm_advisor.py — Fasal AI Protector
 U.P. Release LLM Advisor
 
 Bridges ViT scan result + dataset context → Gemma-2 (primary) → Mistral (fallback)
+<<<<<<< HEAD
 → Hinglish advice card.
 
+=======
+→ Hindi/Hinglish advice card.
+
+Uses the existing Ollama local setup. No new API keys required.
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 
 Exports:
     enrich_scan_response(scan_result, disease_context, location_dict) -> dict
@@ -16,6 +22,10 @@ import os
 import requests
 
 # ─── Ollama Config (reused from ml_service.py settings) ──────────────────────
+<<<<<<< HEAD
+=======
+OLLAMA_URL = os.getenv("OLLAMA_API_URL", "http://localhost:11434/api/generate")
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 GEMMA_MODEL = os.getenv("GEMMA_AI_MODEL", "gemma2")
 MISTRAL_MODEL = os.getenv("MISTRAL_AI_MODEL", "mistral")
 LLM_TIMEOUT = 30  # seconds
@@ -45,7 +55,11 @@ def _build_prompt(crop: str, disease: str, is_healthy: bool,
         return (
             f"Ek kisan ka {crop} ka khet hai jahan sab kuch theek lag raha hai (Healthy). "
             f"Unhe 2-3 points mein batayen kaise apni fasal ko aur achha rakhein. "
+<<<<<<< HEAD
             f"Hinglish mein jawab dein, zyada se zyada 250 shabdon mein."
+=======
+            f"Hinglish mein jawab dein, zyada se zyada 150 shabdon mein."
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
         )
 
     return f"""
@@ -85,7 +99,11 @@ def get_llm_advice(
         disease         : str  e.g. "Late blight"
         is_healthy      : bool
         context_summary : str  from dataset_loader.get_disease_context()
+<<<<<<< HEAD
         location        : str  district name, e.g. {location}, Uttar Pradesh
+=======
+        location        : str  district name, e.g. "Lucknow"
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 
     Returns:
         str  — Advice text in Hinglish

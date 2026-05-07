@@ -1,3 +1,9 @@
+<<<<<<< HEAD
+=======
+"""
+User Model with extended fields for FasAi protector
+"""
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 

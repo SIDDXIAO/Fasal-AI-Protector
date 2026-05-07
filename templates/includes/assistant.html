@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <div id="assistant-view" class="view-section" style="padding: 20px; background: linear-gradient(135deg, #eaf6ea, #fffff0);">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
         <h2 style="color: #0b4d3c; font-weight: 700; margin: 0;">AI Farming Assistant</h2>
@@ -8,12 +9,39 @@
 
     <div class="chat-container modern-chat">
 
+=======
+<div id="assistant-view" class="view-section" style="height: calc(100vh - 120px);">
+    <div class="chat-container modern-chat">
+        <div class="modern-chat-header">
+            <div class="header-title">
+                <div class="bot-avatar">🤖</div>
+                <div>
+                    <h2>Fasal AI</h2>
+                    <span class="status-badge" id="ai-status-badge"><i class="fas fa-circle" style="color:#00b09b;"></i> Online</span>
+                </div>
+            </div>
+        </div>
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 
         <div id="ai-messages" class="modern-chat-messages">
             <div class="ai-bubble ai-bot-bubble">
                 <div class="message-content-wrapper">
+<<<<<<< HEAD
                     <div class="message-text">
                         👋 Namaste! I'm your AI farming assistant. Ask me about crop diseases, fertilizer recommendations, soil health, or farming best practices!
+=======
+                    <div class="avatar-icon">🤖</div>
+                    <div class="message-text">
+                        <strong>नमस्ते <span class="ai-user-name">किसान भाई</span>! / Hello <span class="ai-user-name-en">Farmer</span>! 🌾</strong><br><br>
+                        Main <b>Fasal AI</b> hoon, aapka smart agricultural assistant.<br>
+                        Aaj main aapki kya madad kar sakta hoon?<br><br>
+                        
+                        <div class="topic-suggestions">
+                            <button class="ai-chip" onclick="sendAssistantMsg('गेहूं में कौन सी खाद डालें?')">🌾 गेहूं में कौन सी खाद डालें?</button>
+                            <button class="ai-chip" onclick="sendAssistantMsg('Tamatar me rog ki pehchan aur upay batao')">🍅 Tamatar me rog aur upay</button>
+                            <button class="ai-chip" onclick="sendAssistantMsg('What are the Mandi rates today?')">💰 Today's Mandi Rates</button>
+                        </div>
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
                     </div>
                 </div>
             </div>
@@ -26,6 +54,7 @@
         </div>
 
         <div class="modern-chat-input-wrapper">
+<<<<<<< HEAD
             <div class="inline-mic-box">
                 <button id="chat-mic-btn" type="button" class="voice-input-btn" title="Voice Input">
                     <i class="fas fa-microphone"></i>
@@ -35,6 +64,20 @@
                     <i class="fas fa-paper-plane"></i>
                 </button>
             </div>
+=======
+            <div class="modern-input-box inline-mic-box">
+                <input type="text" id="ai-input" placeholder="Message Fasal AI..." onkeypress="if(event.key==='Enter') sendAssistantMsg()" autocomplete="off">
+                
+                <button onclick="openVoiceDashboard()" class="icon-btn voice-btn" title="Advanced Voice Input">
+                    <i class="fas fa-microphone" id="ai-mic-icon"></i>
+                </button>
+                
+                <button onclick="sendAssistantMsg()" class="icon-btn send-btn" title="Send Message">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+            <div class="chat-footer-text" style="margin-top: 8px; font-size: 0.8rem; color: #888;">AI can make mistakes. Verify important agricultural decisions.</div>
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
         </div>
     </div>
 </div>

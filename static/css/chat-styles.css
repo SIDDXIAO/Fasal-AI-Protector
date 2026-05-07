@@ -1,7 +1,12 @@
 /* ─── TABS & SCROLL FIX ─── */
+<<<<<<< HEAD
 body { overflow: hidden; }
 .main-content { overflow: hidden; height: 100vh; }
 #assistant-view { overflow-y: auto; overflow-x: hidden; }
+=======
+body, .main-content { overflow-y: hidden !important; }
+#assistant-view { overflow: hidden !important; }
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 
 /* Show AI Assistant only when active */
 #assistant-view.active {
@@ -9,6 +14,7 @@ body { overflow: hidden; }
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
+<<<<<<< HEAD
     height: calc(100vh - var(--header-height));
 }
 
@@ -42,6 +48,8 @@ body { overflow: hidden; }
 @keyframes pulse {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.1); }
+=======
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 }
 
 /* ─── CENTERED HEADER ─── */
@@ -65,6 +73,7 @@ body { overflow: hidden; }
 
 /* ─── CENTERED CHAT CONTAINER ─── */
 .chat-container.modern-chat {
+<<<<<<< HEAD
     max-width: 900px;
     width: 100%;
     display: flex;
@@ -76,10 +85,18 @@ body { overflow: hidden; }
     box-shadow: 0 4px 20px rgba(0, 176, 155, 0.1);
     margin: 0 auto;
     overflow: hidden;
+=======
+    max-width: 900px; 
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 }
 
 .modern-chat-messages {
     overflow-y: auto;
+<<<<<<< HEAD
     overflow-x: hidden;
     scrollbar-width: thin;
     padding: 20px;
@@ -89,11 +106,22 @@ body { overflow: hidden; }
     flex: 1;
     min-height: 0;
     word-wrap: break-word;
+=======
+    scrollbar-width: thin; 
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px; 
+    flex: 1;
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 }
 
 /* ─── BUBBLE ALIGNMENT & COLORS ─── */
 .ai-bubble { display: flex; max-width: 85%; }
+<<<<<<< HEAD
 .message-content-wrapper { max-width: 100%; word-wrap: break-word; overflow-wrap: break-word; }
+=======
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 
 /* Centering the first greeting bubble */
 .ai-bot-bubble:first-child {
@@ -116,12 +144,20 @@ body { overflow: hidden; }
 /* Bot Bubble (Clean White) */
 .ai-bot-bubble {
     align-self: flex-start;
+<<<<<<< HEAD
     background: #eaf6ea; 
     color: #2e4a3b; 
     border-radius: 12px;
     padding: 15px 20px;
     border: none;
     font-size: 0.95rem;
+=======
+    background: #ffffff; 
+    color: #333; 
+    border-radius: 18px 18px 18px 0px;
+    padding: 15px 20px;
+    border: 1px solid #e2e8f0;
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 }
 
 /* Suggestion Chips Centering */
@@ -134,6 +170,7 @@ body { overflow: hidden; }
 }
 
 /* ─── ACTION BAR & INPUT ─── */
+<<<<<<< HEAD
 .modern-action-bar {
     display: flex;
     gap: 8px;
@@ -288,3 +325,15 @@ body { overflow: hidden; }
     font-size: 1.1rem;
     margin-left: 2px;
 }
+=======
+.modern-action-bar { display: flex; gap: 12px; margin-top: 12px; border-top: 1px solid #f0f0f0; padding-top: 8px; }
+.mod-action-btn:hover { color: #00b09b; }
+
+.modern-chat-input-wrapper { display: flex; flex-direction: column; align-items: center; padding: 15px; }
+.inline-mic-box { 
+    display: flex; align-items: center; background: #fff; border: 1px solid #e2e8f0; 
+    border-radius: 30px; width: 100%; max-width: 800px; padding: 5px 15px;
+}
+.inline-mic-box input { flex: 1; border: none; outline: none; padding: 10px; }
+.inline-mic-box .send-btn { color: #00b09b; cursor: pointer; }
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6

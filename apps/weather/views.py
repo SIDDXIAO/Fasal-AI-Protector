@@ -28,12 +28,16 @@ def get_live_weather(request):
                 "description": data['weather'][0]['description'].title(),
                 "icon_code": data['weather'][0]['icon'],
                 "humidity": data['main']['humidity'],
+<<<<<<< HEAD
                 "wind_speed": data['wind']['speed'],
                 "sunrise": data['sys']['sunrise'],
                 "sunset": data['sys']['sunset'],
                 "pressure": data['main']['pressure'],
                 "visibility": data.get('visibility', 0) / 1000,
                 "rain_probability": int(data.get('rain', {}).get('1h', 0) * 10) if 'rain' in data else 0
+=======
+                "wind_speed": data['wind']['speed']
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
             }
             return JsonResponse(weather_info)
         else:

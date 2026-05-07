@@ -1,4 +1,10 @@
+<<<<<<< HEAD
 
+=======
+"""
+FasAi Protector - Django Settings
+"""
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 import os
 from pathlib import Path
 from decouple import config
@@ -153,6 +159,7 @@ OPENWEATHER_API_KEY = config('OPENWEATHER_API_KEY', default='your_api_key_here')
 MANDI_API_KEY = config('MANDI_API_KEY', default='579b464db66ec23bdd000001de83fc07b14447535ee3b0203e7e5f2e')
 
 # ═══════════════════════════════════════
+<<<<<<< HEAD
 # LM Studio / Local AI Model Settings
 # ═══════════════════════════════════════
 AI_PROVIDER = config('AI_PROVIDER', default='gemma')
@@ -166,6 +173,19 @@ GEMMA_MODEL = config('GEMMA_MODEL', default='gemma-2-9b-it')
 
 # Mistral Model (loaded in LM Studio)
 MISTRAL_MODEL = config('MISTRAL_MODEL', default='mistral-7b-instruct-v0.3')
+=======
+# LM Studio / Local LLM Settings
+# ═══════════════════════════════════════
+AI_PROVIDER = config('AI_PROVIDER', default='gemma')
+
+# Mistral 7B
+MISTRAL_AI_BASE_URL = config('MISTRAL_AI_BASE_URL', default='http://localhost:1234')
+MISTRAL_AI_MODEL = config('MISTRAL_AI_MODEL', default='mistral-7b')
+
+# Gemma 2 9B
+GEMMA_AI_BASE_URL = config('GEMMA_AI_BASE_URL', default='http://10.230.82.15:1234')
+GEMMA_AI_MODEL = config('GEMMA_AI_MODEL', default='gemma-2-9b-it')
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 
 # ═══════════════════════════════════════
 # ChromaDB / Vector DB

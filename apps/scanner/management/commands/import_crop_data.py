@@ -1,4 +1,11 @@
+<<<<<<< HEAD
 
+=======
+"""
+CSV Data Import Management Command
+Imports ALL records from UP_Complete CSV files without data loss
+"""
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 import csv
 import os
 from django.core.management.base import BaseCommand

@@ -23,6 +23,7 @@ function getCSRFToken() {
     return getCookie('csrftoken') || '';
 }
 
+<<<<<<< HEAD
 // ═══════════════════════════════════════════
 // SHARED LOCATION STORE
 // Weather + Mandi dono yahan se district lete hain.
@@ -93,6 +94,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+=======
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 // ─── Toast Notifications ───
 function showToast(message, type = 'info') {
     const container = document.getElementById('toast-container');
@@ -140,11 +143,18 @@ async function handleLogin() {
 
     try {
         // First get CSRF token
+<<<<<<< HEAD
         await fetch('/api/scanner/csrf-token/', { credentials: 'same-origin' });
 
         const res = await fetch('/api/auth/login/', {
             method: 'POST',
             credentials: 'same-origin',
+=======
+        await fetch('/api/scanner/csrf-token/');
+
+        const res = await fetch('/api/auth/login/', {
+            method: 'POST',
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': getCSRFToken()
@@ -192,11 +202,18 @@ async function handleSignup() {
     btn.disabled = true;
 
     try {
+<<<<<<< HEAD
         await fetch('/api/scanner/csrf-token/', { credentials: 'same-origin' });
 
         const res = await fetch('/api/auth/signup/', {
             method: 'POST',
             credentials: 'same-origin',
+=======
+        await fetch('/api/scanner/csrf-token/');
+
+        const res = await fetch('/api/auth/signup/', {
+            method: 'POST',
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': getCSRFToken()
@@ -222,15 +239,22 @@ async function handleSignup() {
 }
 
 function enterDashboard(user) {
+<<<<<<< HEAD
     // Save to localStorage for display name persistence (NOT for auth bypass)
+=======
+    // Save to localStorage for session persistence
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
     try {
         localStorage.setItem('agriUser', JSON.stringify(user));
     } catch (e) {
         console.error('LocalStorage error:', e);
     }
 
+<<<<<<< HEAD
     const landing = document.getElementById('landing-container');
     if (landing) landing.style.display = 'none';
+=======
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
     document.getElementById('login-container').style.display = 'none';
     document.getElementById('app-wrapper').style.display = 'flex';
 
@@ -238,10 +262,13 @@ function enterDashboard(user) {
     document.getElementById('user-display-name').innerText = displayName;
     document.getElementById('welcome-msg').innerHTML = `🌾 Hello, <b>${displayName.split(' ')[0]}</b>! 👋`;
 
+<<<<<<< HEAD
     // ── Restore last active page (Ctrl+R fix) ──
     const lastPage = localStorage.getItem('fasalActivePage') || 'dashboard';
     showPage(lastPage);
 
+=======
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
     // Show weather alert
     setTimeout(() => {
         const alert = document.getElementById('weather-alert');
@@ -250,14 +277,21 @@ function enterDashboard(user) {
 
     // Initial data fetch
     loadDashboardData(); 
+<<<<<<< HEAD
     fetchStats();
+=======
+    fetchStats(); // Keep this if you have a separate analytics endpoint
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 }
 
 async function handleLogout() {
     try {
         await fetch('/api/auth/logout/', {
             method: 'POST',
+<<<<<<< HEAD
             credentials: 'same-origin',
+=======
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
             headers: { 'X-CSRFToken': getCSRFToken() }
         });
     } catch (e) {
@@ -271,7 +305,11 @@ async function handleLogout() {
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         // Check with backend if session is still valid
+<<<<<<< HEAD
         const res = await fetch('/api/auth/check/', { credentials: 'same-origin' });
+=======
+        const res = await fetch('/api/auth/check/');
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
         const data = await res.json();
 
         if (data.authenticated) {
@@ -279,6 +317,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
     } catch (e) {
+<<<<<<< HEAD
         console.log('Auth check failed, showing landing...');
     }
 
@@ -287,6 +326,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Fetch CSRF token for login/signup forms
     try { await fetch('/api/scanner/csrf-token/', { credentials: 'same-origin' }); } catch (e) { /* server might not be ready */ }
+=======
+        console.log('Auth check failed, trying localStorage...');
+    }
+
+    // Fallback: check localStorage
+    const saved = localStorage.getItem('agriUser');
+    if (saved) {
+        try {
+            const user = JSON.parse(saved);
+            enterDashboard(user);
+            return;
+        } catch (e) { /* invalid JSON */ }
+    }
+
+    // Show login screen
+    document.getElementById('app-wrapper').style.display = 'none';
+    document.getElementById('login-container').style.display = 'flex';
+
+    // Fetch CSRF token for login/signup forms
+    try { await fetch('/api/scanner/csrf-token/'); } catch (e) { /* server might not be ready */ }
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 });
 
 // ═══════════════════════════════════════════
@@ -295,7 +355,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Fetch stats from DB and populate Dashboard + History
 function loadDashboardData() {
+<<<<<<< HEAD
     fetch('/api/scanner/dashboard-stats/', { credentials: 'same-origin' })
+=======
+    fetch('/api/scanner/dashboard-stats/') 
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
         .then(response => {
             if (!response.ok) throw new Error("Not logged in or server error");
             return response.json();
@@ -319,6 +383,7 @@ function loadDashboardData() {
                     let statusText = scan.is_healthy ? 'Healthy' : 'Infected';
                     let icon = scan.is_healthy ? 'fa-check-circle' : 'fa-bug';
                     
+<<<<<<< HEAD
                     let treatmentText = 'Consult expert';
                     let recognizeText = '';
                     if (scan.reference_detail) {
@@ -339,6 +404,15 @@ function loadDashboardData() {
                         year: 'numeric', month: 'short', day: 'numeric',
                         hour: '2-digit', minute: '2-digit'
                     });
+=======
+                    // Create formatted remedy data for the modal
+                    let remedyData = scan.is_healthy 
+                        ? JSON.stringify([{ icon: '✅', heading: 'Healthy', points: ['Your crop is in excellent condition'] }])
+                        : JSON.stringify([{ icon: '💊', heading: 'Treatment', points: [
+                            scan.reference_detail ? scan.reference_detail.treatment_options : 'Consult expert',
+                            scan.reference_detail ? scan.reference_detail.how_to_recognize : ''
+                        ] }]);
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 
                     // We use the addToHistory helper to properly attach click events for the modal
                     addToHistory(
@@ -346,8 +420,12 @@ function loadDashboardData() {
                         scan.image_url || '/static/assets/placeholder-leaf.png', 
                         scan.is_healthy ? 'safe' : 'danger', 
                         remedyData,
+<<<<<<< HEAD
                         formattedDate,
                         scan.id
+=======
+                        scan.date
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
                     );
                 });
             }
@@ -368,9 +446,12 @@ function showPage(pid) {
     if (view) view.classList.add('active');
     if (nav) nav.classList.add('active');
 
+<<<<<<< HEAD
     // ── Save active page so Ctrl+R restores it ──
     try { localStorage.setItem('fasalActivePage', pid); } catch(e) {}
 
+=======
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
     const titles = {
         dashboard: 'Dashboard', scanner: 'AI Scanner', analytics: 'Analytics',
         history: 'Scan History', assistant: 'AI Assistant', mandi: 'Mandi Rates', profile: 'User Profile'
@@ -379,12 +460,15 @@ function showPage(pid) {
     if (titleEl) titleEl.innerText = titles[pid] || 'Fasal AI Protector';
     document.title = (titles[pid] || 'Home') + ' — Fasal AI Protector';
 
+<<<<<<< HEAD
     // Show/hide mandi ticker only on dashboard
     const ticker = document.getElementById('mandi-ticker');
     if (ticker) {
         ticker.style.display = pid === 'dashboard' ? 'block' : 'none';
     }
 
+=======
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
     if (pid === 'profile') {
         const saved = localStorage.getItem('agriUser');
         if (saved) {
@@ -403,11 +487,14 @@ function showPage(pid) {
         loadDashboardData();
     }
 
+<<<<<<< HEAD
     // Refresh analytics when navigating to analytics
     if (pid === 'analytics') {
         fetchStats();
     }
 
+=======
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
     if (pid !== 'scanner') stopCamera();
 
     // Mobile: close sidebar
@@ -437,12 +524,21 @@ document.addEventListener('DOMContentLoaded', () => {
 // ─── Charts ───
 async function fetchStats() {
     try {
+<<<<<<< HEAD
         const res = await fetch('/api/scanner/analytics/', { credentials: 'same-origin' });
+=======
+        const res = await fetch('/api/scanner/analytics/');
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
         if (!res.ok) throw new Error('Failed');
         const data = await res.json();
         if (data.success) {
             stats = data.stats;
+<<<<<<< HEAD
             initCharts(data.weekly, data.trend_labels, data.trend_data, data.health_data, data.scans);
+=======
+            initCharts(data.weekly);
+            // updateStatCards() is now handled by loadDashboardData(), but keeping this for safety
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
             updateStatCards(); 
         }
     } catch (e) {
@@ -460,6 +556,7 @@ function updateStatCards() {
     if (totalEl && totalEl.innerText === '0') totalEl.innerText = stats.total.toLocaleString();
     if (healthyEl && healthyEl.innerText === '0') healthyEl.innerText = stats.healthy.toLocaleString();
     if (infectedEl && infectedEl.innerText === '0') infectedEl.innerText = stats.infected.toLocaleString();
+<<<<<<< HEAD
     // Update Analytics Tab Stats dynamically
     const aTotal = document.getElementById('analytics-stat-total');
     const aInfected = document.getElementById('analytics-stat-infected');
@@ -477,15 +574,26 @@ function updateStatCards() {
 }
 
 function initCharts(weeklyData = { labels: [], data: [] }, trendLabels, trendData, healthData, scans = []) {
+=======
+    if (effEl && stats.total > 0 && effEl.innerText === '—') {
+        effEl.innerText = Math.round((stats.healthy / stats.total) * 100) + '%';
+    }
+}
+
+function initCharts(weeklyData = { labels: [], data: [] }) {
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
     if (chartWeekly) chartWeekly.destroy();
     if (chartTrend) chartTrend.destroy();
     if (chartHealth) chartHealth.destroy();
 
+<<<<<<< HEAD
     // Update Analytics Tab Charts
     if (typeof window.updateAnalyticsTabCharts === 'function') {
         window.updateAnalyticsTabCharts(weeklyData, healthData, scans);
     }
 
+=======
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
     const opt = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
 
     const weeklyCanvas = document.getElementById('weeklyChart');
@@ -511,10 +619,17 @@ function initCharts(weeklyData = { labels: [], data: [] }, trendLabels, trendDat
         chartTrend = new Chart(trendCanvas, {
             type: 'line',
             data: {
+<<<<<<< HEAD
                 labels: trendLabels || ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
                 datasets: [{
                     label: 'Scans',
                     data: trendData || [0, 0, 0, 0],
+=======
+                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                datasets: [{
+                    label: 'Issues',
+                    data: [stats.infected || 0, Math.max(0, (stats.infected || 0) - 5), Math.max(0, (stats.infected || 0) + 3), stats.infected || 0],
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
                     borderColor: '#ef4444',
                     backgroundColor: 'rgba(239, 68, 68, 0.05)',
                     fill: true,
@@ -529,13 +644,20 @@ function initCharts(weeklyData = { labels: [], data: [] }, trendLabels, trendDat
 
     const healthCanvas = document.getElementById('healthChart');
     if (healthCanvas) {
+<<<<<<< HEAD
         const hData = healthData || [Math.max(stats.healthy, 1), Math.max(stats.infected, 0)];
+=======
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
         chartHealth = new Chart(healthCanvas, {
             type: 'doughnut',
             data: {
                 labels: ['Healthy', 'Infected'],
                 datasets: [{
+<<<<<<< HEAD
                     data: hData,
+=======
+                    data: [Math.max(stats.healthy, 1), Math.max(stats.infected, 0)],
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
                     backgroundColor: ['#10b981', '#ef4444'],
                     borderWidth: 0,
                     borderRadius: 4
@@ -696,7 +818,11 @@ async function runPrediction() {
         const res = await fetch(imgElement.src);
         const blob = await res.blob();
         const formData = new FormData();
+<<<<<<< HEAD
         formData.append('image', blob, 'scan.jpg'); 
+=======
+        formData.append('leaf_image', blob, 'scan.jpg'); // Changed to leaf_image to match your view
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
         formData.append('location', 'Lucknow, UP');
         // Inject GPS coordinates if available (from fasal_features.js)
         if (window._fasalLat) formData.append('lat', window._fasalLat);
@@ -705,7 +831,10 @@ async function runPrediction() {
         // Note: Using the new process_leaf_scan endpoint which saves automatically
         const apiRes = await fetch('/api/scanner/process_leaf_scan/', { 
             method: 'POST',
+<<<<<<< HEAD
             credentials: 'same-origin',
+=======
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
             headers: { 'X-CSRFToken': getCSRFToken() },
             body: formData
         });
@@ -790,6 +919,7 @@ async function runPrediction() {
         }
 
         // REFRESH DB DATA (Updates Dashboard numbers & adds to History automatically)
+<<<<<<< HEAD
         setTimeout(loadDashboardData, 1000);
 
         // LLM Advice Card - Parse structured JSON response
@@ -803,6 +933,13 @@ async function runPrediction() {
                     window.FasalScan.renderAdvice(result);
                 }
             }
+=======
+        setTimeout(loadDashboardData, 1000); 
+
+        // LLM Advice Card (rendered by fasal_features.js)
+        if (window.FasalScan && llmAdvice) {
+            window.FasalScan.renderAdvice(result);
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
         }
 
         if (isHealthy) {
@@ -818,6 +955,7 @@ async function runPrediction() {
     }
 }
 
+<<<<<<< HEAD
 // ═══════════════════════════════════════════════════════════════
 // STRUCTURED ADVICE RENDERER
 // ═══════════════════════════════════════════════════════════════
@@ -896,10 +1034,19 @@ function renderStructuredAdvice(adviceData, cropName, diseaseName) {
 let voiceRecognition = null;
 
 function startVoice() {
+=======
+// ═══════════════════════════════════════════
+// VOICE
+// ═══════════════════════════════════════════
+
+function startVoice() {
+    const mic = document.getElementById('mic-icon');
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
         showToast('Voice not supported in this browser', 'warning');
         return;
     }
+<<<<<<< HEAD
 
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     voiceRecognition = new SR();
@@ -946,6 +1093,25 @@ function startVoice() {
     };
 
     voiceRecognition.start();
+=======
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const r = new SR();
+    r.lang = typeof getVoiceLang === 'function' ? getVoiceLang() : 'hi-IN';
+    r.onstart = () => mic.className = 'fas fa-spinner fa-spin';
+    r.onresult = (e) => {
+        mic.className = 'fas fa-microphone';
+        const cmd = e.results[0][0].transcript.toLowerCase();
+        if (cmd.includes('scan')) { showPage('scanner'); }
+        else if (cmd.includes('dashboard')) { showPage('dashboard'); }
+        else if (cmd.includes('analytics') || cmd.includes('chart')) { showPage('analytics'); }
+        else if (cmd.includes('history')) { showPage('history'); }
+        else if (cmd.includes('assistant') || cmd.includes('chat')) { showPage('assistant'); }
+        else { showToast('Voice: ' + cmd, 'info'); }
+    };
+    r.onerror = () => mic.className = 'fas fa-microphone';
+    r.onend = () => mic.className = 'fas fa-microphone';
+    r.start();
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 }
 
 // ═══════════════════════════════════════════
@@ -954,7 +1120,11 @@ function startVoice() {
 
 let currentModalData = {};
 
+<<<<<<< HEAD
 function addToHistory(title, imgSrc, status, remedy, dateStr, scanId) {
+=======
+function addToHistory(title, imgSrc, status, remedy, dateStr) {
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
     const list = document.getElementById('history-container');
     if (!list) return;
 
@@ -962,10 +1132,13 @@ function addToHistory(title, imgSrc, status, remedy, dateStr, scanId) {
     const emptyState = list.querySelector('div[style*="text-align:center"]');
     if (emptyState) emptyState.remove();
 
+<<<<<<< HEAD
     // Show action buttons
     const actionsDiv = document.getElementById('history-actions');
     if (actionsDiv) actionsDiv.style.display = 'flex';
 
+=======
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
     const card = document.createElement('div');
     card.className = 'history-card';
     // Use the date provided by the DB, or fallback to current time
@@ -976,11 +1149,18 @@ function addToHistory(title, imgSrc, status, remedy, dateStr, scanId) {
     card.setAttribute('data-status', status);
     card.setAttribute('data-remedy', remedy || '');
     card.setAttribute('data-date', timestamp);
+<<<<<<< HEAD
     card.setAttribute('data-id', scanId || '');
 
     const statusText = status === 'safe' ? 'Healthy' : 'Infected';
     
     // Create the card with inline styles - with checkbox support
+=======
+
+    const statusText = status === 'safe' ? 'Healthy' : 'Infected';
+    
+    // Create the card with inline styles similar to what we planned
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
     card.style.cssText = "background: var(--bg-card); padding: 15px; border-radius: var(--radius-lg); margin-bottom: 12px; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; box-shadow: var(--shadow-sm); cursor:pointer;";
     
     let statusColor = status === 'safe' ? '#10b981' : '#ef4444';
@@ -988,8 +1168,12 @@ function addToHistory(title, imgSrc, status, remedy, dateStr, scanId) {
 
     card.innerHTML = `
         <div style="display: flex; align-items: center; gap: 15px;">
+<<<<<<< HEAD
             <input type="checkbox" class="history-checkbox" onchange="historyCheckboxChanged()" style="width:20px; height:20px; accent-color:var(--primary); cursor:pointer; flex-shrink:0;">
             <div style="background: ${statusColor}20; color: ${statusColor}; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink:0;">
+=======
+            <div style="background: ${statusColor}20; color: ${statusColor}; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
                 <i class="fas ${icon}"></i>
             </div>
             <div>
@@ -1001,8 +1185,12 @@ function addToHistory(title, imgSrc, status, remedy, dateStr, scanId) {
             <div style="color: ${statusColor}; font-weight: 700; font-size: 0.9rem; text-transform: uppercase;">${statusText}</div>
         </div>`;
 
+<<<<<<< HEAD
     card.onclick = function (e) {
         if (e.target.classList.contains('history-checkbox')) return;
+=======
+    card.onclick = function () {
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
         openHistoryModal(
             this.getAttribute('data-title'),
             this.getAttribute('data-img'),
@@ -1016,6 +1204,7 @@ function addToHistory(title, imgSrc, status, remedy, dateStr, scanId) {
     list.appendChild(card);
 }
 
+<<<<<<< HEAD
 function historyCheckboxChanged() {
     const checkboxes = document.querySelectorAll('.history-checkbox');
     const selectAll = document.getElementById('select-all-history');
@@ -1107,6 +1296,8 @@ function deleteHistoryCards(checkboxes) {
     }
 }
 
+=======
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 function openHistoryModal(title, img, status, remedy, date) {
     currentModalData = { title, img, status, remedy, date };
 
@@ -1236,7 +1427,10 @@ async function updateProfile() {
     try {
         const res = await fetch('/api/auth/profile/update/', {
             method: 'PUT',
+<<<<<<< HEAD
             credentials: 'same-origin',
+=======
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': getCSRFToken()
@@ -1278,7 +1472,10 @@ async function deleteProfileConfirm() {
         try {
             const res = await fetch('/api/auth/profile/delete/', {
                 method: 'DELETE',
+<<<<<<< HEAD
                 credentials: 'same-origin',
+=======
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
                 headers: {
                     'X-CSRFToken': getCSRFToken()
                 }
@@ -1303,6 +1500,7 @@ document.addEventListener('click', (e) => {
     if (selector && menu && !selector.contains(e.target)) {
         menu.style.display = 'none';
     }
+<<<<<<< HEAD
 });
 
 // ═══════════════════════════════════════════
@@ -1337,3 +1535,6 @@ function showSignupFromLanding() {
     if (app) app.style.display = 'none';
     switchAuthTab('signup', document.getElementById('tab-signup'));
 }
+=======
+});
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6

@@ -4,7 +4,10 @@ db.sqlite3
 media/
 staticfiles/
 .env
+<<<<<<< HEAD
 .env.example
+=======
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 venv/
 *.log
 

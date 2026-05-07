@@ -1,7 +1,11 @@
 """
 Plant Disease Detection - ML Service
 ViT model predictions ko Reference CSV + UP CSV Dataset se match karta hai
+<<<<<<< HEAD
 Aur LLM (LM Studio - Gemma/Mistral) ke through smart response generate karta hai.
+=======
+Aur LLM (Gemma-2 / Mistral) ke through smart response generate karta hai.
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 """
 try:
     import torch
@@ -19,6 +23,7 @@ import requests
 import pandas as pd
 from django.conf import settings
 
+<<<<<<< HEAD
 # LM Studio configuration for LLM advice
 LM_STUDIO_URL = getattr(settings, 'LM_STUDIO_BASE_URL', 'http://localhost:1234')
 LM_STUDIO_KEY = getattr(settings, 'LM_STUDIO_API_KEY', 'sk-empty')
@@ -27,6 +32,10 @@ GEMMA_MODEL = getattr(settings, 'GEMMA_MODEL', 'gemma-2-9b-it')
 # Mandi API configuration
 MANDI_API_KEY = getattr(settings, 'MANDI_API_KEY', '579b464db66ec23bdd000001de83fc07b14447535ee3b0203e7e5f2e')
 MANDI_API_URL = "https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070"
+=======
+# Ollama API URL for local LLMs
+GEMMA_AI_BASE_URL="http://192.168.1.24:1234"
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 # ─────────────────────────────────────────────
 # Dataset Loader - App startup par ek baar load
 # ─────────────────────────────────────────────
@@ -110,6 +119,7 @@ class DatasetCache:
         return cls._csv_df
 
 
+<<<<<<< HEAD
 # ---- YAHAN FIX APPLY KIYA GAYA HAI (NaN/float error ke liye) ----
 def _normalize(text) -> str:
     # Agar value NaN (float) ya empty hai, toh empty string return karein
@@ -122,6 +132,13 @@ def _normalize(text) -> str:
     text = re.sub(r"\s+", " ", text).strip()
     return text
 # -----------------------------------------------------------------
+=======
+def _normalize(text: str) -> str:
+    text = text.lower()
+    text = re.sub(r"[^a-z\s]", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 
 
 def _score_match(query_words: list, target: str) -> int:
@@ -147,6 +164,7 @@ def _match_from_reference(crop_norm: str, disease_norm: str) -> dict | None:
 
     scores = search_pool["_disease_norm"].apply(lambda d: _score_match(disease_words, d))
 
+<<<<<<< HEAD
     # ---- YAHAN FIX APPLY KIYA GAYA THA (.iloc ko .loc se replace kiya) ----
     if scores.max() == 0:
         scores = df["_disease_norm"].apply(lambda d: _score_match(disease_words, d))
@@ -155,6 +173,14 @@ def _match_from_reference(crop_norm: str, disease_norm: str) -> dict | None:
     else:
         best_row = search_pool.loc[scores.idxmax()]
     # ------------------------------------------------------------------------
+=======
+    if scores.max() == 0:
+        scores = df["_disease_norm"].apply(lambda d: _score_match(disease_words, d))
+        if scores.max() == 0: return None
+        best_row = df.iloc[scores.idxmax()]
+    else:
+        best_row = search_pool.iloc[scores.idxmax()]
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 
     return {
         "source": "csv_reference",
@@ -239,6 +265,7 @@ def get_disease_treatment(crop: str, disease: str, location: str = None) -> dict
 
 def generate_smart_advice(crop: str, disease: str, is_healthy: bool, dataset_result: dict, location: str) -> str:
     """LLM ko local data feed karke smart expert advice generate karta hai."""
+<<<<<<< HEAD
     if is_healthy:
         return json.dumps({
             "status": "healthy",
@@ -253,12 +280,20 @@ def generate_smart_advice(crop: str, disease: str, is_healthy: bool, dataset_res
             ]
         }, ensure_ascii=False)
 
+=======
+    
+    if is_healthy:
+        return f"Badhai ho! Aapki {crop} ki fasal bilkul swasth (Healthy) lag rahi hai. Kripya niyamit roop se khet ki nigrani karte rahein."
+
+    # Dataset matched data ko JSON me convert karo taaki LLM read kar sake
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
     local_data = {
         "reference_guide_info": dataset_result.get("reference"),
         "district_level_treatments": dataset_result.get("treatments")
     }
     local_data_json = json.dumps(local_data, ensure_ascii=False)
 
+<<<<<<< HEAD
     # Fetch mandi rate for the crop
     district = location.split(',')[0].strip() if ',' in location else 'Lucknow'
     mandi_data = get_mandi_rate(crop, district)
@@ -375,6 +410,42 @@ INSTRUCTIONS:
                 "🛡️ 15 din baad dobara spray karein preventive ke liye"
             ]
         }, ensure_ascii=False)
+=======
+    prompt = f"""
+    You are 'Fasal AI', an expert Indian Agricultural Assistant.
+    A farmer from '{location}' uploaded an image of their '{crop}'.
+    Our Vision Model detected the disease/pest: '{disease}'.
+
+    Here is the exact treatment, pesticide, and localized data from our verified UP Database in JSON format:
+    {local_data_json}
+
+    INSTRUCTIONS:
+    1. Write a highly helpful, easy-to-understand response for the farmer.
+    2. Base your treatment advice STRICTLY on the 'verified dataset' provided above. Do not invent pesticides.
+    3. Keep the tone empathetic and respectful. Mention their location ({location}) to make it personalized.
+    4. Provide the solution in clear bullet points (Cause, Chemical Treatment, Organic Treatment).
+    5. Keep it concise and use a mix of Hindi and English (Hinglish) if possible.
+    """
+
+    # Primary Model: Gemma-2
+    try:
+        print("[LLM] Generating advice using Gemma-2...")
+        res = requests.post(LLM_API_URL, json={"model": "gemma2", "prompt": prompt, "stream": False}, timeout=30)
+        res.raise_for_status()
+        return res.json().get('response', '')
+    except Exception as e:
+        print(f"[LLM] Gemma-2 failed: {e}. Switching to Mistral 7B...")
+        
+        # Secondary Model: Mistral
+        try:
+            res = requests.post(LLM_API_URL, json={"model": "mistral", "prompt": prompt, "stream": False}, timeout=30)
+            res.raise_for_status()
+            return res.json().get('response', '')
+        except Exception as e2:
+            print(f"[LLM] Mistral also failed: {e2}")
+            # Fallback text in case both models are offline
+            return "Kshama karein, abhi hamara AI system busy hai. Kripya neeche diye gaye Treatment Cards me dawaiyo ki jaankari dekhein."
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 
 
 # ─────────────────────────────────────────────
@@ -402,6 +473,7 @@ class PlantDiseaseDetector:
             if os.path.exists(self.model_path):
                 print(f"Loading ViT model from {self.model_path}...")
                 self.model = ViTForImageClassification.from_pretrained(self.model_path)
+<<<<<<< HEAD
                 
                 try:
                     self.processor = ViTImageProcessor.from_pretrained(self.model_path)
@@ -410,6 +482,9 @@ class PlantDiseaseDetector:
                     self.processor = ViTImageProcessor.from_pretrained("google/vit-base-patch16-224")
                     self.processor.save_pretrained(self.model_path)
                 
+=======
+                self.processor = ViTImageProcessor.from_pretrained("google/vit-base-patch16-224")
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
                 self.model.to(self.device)
                 self.model.eval()
                 print("[OK] ViT Model loaded successfully.")
@@ -433,13 +508,21 @@ class PlantDiseaseDetector:
                 probs = torch.nn.functional.softmax(logits, dim=-1)
 
                 top_prob, top_idx = torch.max(probs, dim=-1)
+<<<<<<< HEAD
                 predicted_class = self.model.config.id2label[top_idx.item()]
+=======
+                predicted_class = self.model.config.id2label[str(top_idx.item())]
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
                 confidence = top_prob.item()
 
                 top_k_probs, top_k_indices = torch.topk(probs, min(top_k, probs.shape[-1]))
                 top_predictions = [
                     {
+<<<<<<< HEAD
                         "label": self.model.config.id2label[idx.item()],
+=======
+                        "label": self.model.config.id2label[str(idx.item())],
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
                         "score": round(prob.item(), 4),
                     }
                     for prob, idx in zip(top_k_probs[0], top_k_indices[0])
@@ -502,6 +585,7 @@ class PlantDiseaseDetector:
         }
 
 
+<<<<<<< HEAD
 FALLBACK_MANDI_RATES = {
     "Wheat": 2275, "Paddy": 2180, "Potato": 1200, "Tomato": 1800,
     "Mustard": 5200, "Sugarcane": 3500, "Maize": 1960, "Bajra": 2100,
@@ -568,5 +652,7 @@ def _build_fertilizer_info(reference_data: dict) -> str:
     return " | ".join(fertilizer_info) if fertilizer_info else ""
 
 
+=======
+>>>>>>> 169f17db8a37b1a5a0d42a769b91fd8abb1d82c6
 # Singleton - app startup par ek baar initialize
 detector = PlantDiseaseDetector()
