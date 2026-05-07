@@ -55,8 +55,8 @@ base_dir = os.path.dirname(os.path.abspath(__file__))
 CONFIG = {
     # --- API SETTINGS ---
     'USE_API': True,  # True = Use API (Fast), False = Use Web Scraping (Slow)
-    'API_KEY': '579b464db66ec23bdd000001de83fc07b14447535ee3b0203e7e5f2e',
-    'API_URL': 'https://api.data.gov.in/resource/35985678-0d79-46b4-9cd6-6f13308a1d24', # e.g., https://api.data.gov.in/resource/...
+    'API_KEY': '579b464db66ec23bdd000001de83fc07b14',
+    'API_URL': 'https://api.data.gov.in/resource4', # e.g., https://api.data.gov.in/resource/...
     
     # --- GENERAL SETTINGS ---
     'state': 'Uttar Pradesh',
