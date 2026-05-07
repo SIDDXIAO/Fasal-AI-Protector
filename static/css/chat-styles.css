@@ -1,0 +1,290 @@
+/* ─── TABS & SCROLL FIX ─── */
+body { overflow: hidden; }
+.main-content { overflow: hidden; height: 100vh; }
+#assistant-view { overflow-y: auto; overflow-x: hidden; }
+
+/* Show AI Assistant only when active */
+#assistant-view.active {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: calc(100vh - var(--header-height));
+}
+
+/* ─── VOICE INPUT BUTTON IN CHAT ─── */
+.voice-input-btn {
+    background: #f1f5f9;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #64748b;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.voice-input-btn:hover {
+    background: #e2e8f0;
+    color: #00b09b;
+}
+
+.voice-input-btn.listening {
+    background: #00b09b;
+    color: white;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* ─── CENTERED HEADER ─── */
+.modern-chat-header {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding: 20px 0;
+}
+
+.header-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.header-title .bot-avatar { font-size: 2.2rem; margin-bottom: 5px; }
+.header-title h2 { margin: 0 0 5px 0 !important; font-size: 1.5rem; color: var(--text-main); }
+.status-badge { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; }
+
+/* ─── CENTERED CHAT CONTAINER ─── */
+.chat-container.modern-chat {
+    max-width: 900px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 140px);
+    background: #ffffff;
+    border: 1px solid #a5d6a7;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 176, 155, 0.1);
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+.modern-chat-messages {
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    flex: 1;
+    min-height: 0;
+    word-wrap: break-word;
+}
+
+/* ─── BUBBLE ALIGNMENT & COLORS ─── */
+.ai-bubble { display: flex; max-width: 85%; }
+.message-content-wrapper { max-width: 100%; word-wrap: break-word; overflow-wrap: break-word; }
+
+/* Centering the first greeting bubble */
+.ai-bot-bubble:first-child {
+    align-self: center !important;
+    text-align: center;
+    margin: 20px auto;
+}
+
+.ai-bot-bubble:first-child .message-content-wrapper { align-items: center; }
+
+/* User Bubble (Fasal Green) */
+.ai-user-bubble {
+    align-self: flex-end;
+    background: linear-gradient(135deg, #00b09b, #96c93d);
+    color: white;
+    border-radius: 18px 18px 0px 18px; 
+    padding: 12px 18px;
+}
+
+/* Bot Bubble (Clean White) */
+.ai-bot-bubble {
+    align-self: flex-start;
+    background: #eaf6ea; 
+    color: #2e4a3b; 
+    border-radius: 12px;
+    padding: 15px 20px;
+    border: none;
+    font-size: 0.95rem;
+}
+
+/* Suggestion Chips Centering */
+.topic-suggestions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+/* ─── ACTION BAR & INPUT ─── */
+.modern-action-bar {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 10px;
+}
+
+.mod-action-btn {
+    background: transparent;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 6px 10px;
+    color: #6b7280;
+    cursor: pointer;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+}
+
+.mod-action-btn:hover {
+    background: #f3f4f6;
+    color: #00b09b;
+    border-color: #00b09b;
+}
+
+.mod-action-btn.listening {
+    background: #00b09b;
+    color: white;
+    border-color: #00b09b;
+}
+
+/* Message text styling */
+.message-text {
+    line-height: 1.6;
+    color: #1f2937;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+}
+
+.user-message-text {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.message-text h3, .message-text h4 {
+    color: #059669;
+    margin: 12px 0 8px 0;
+}
+
+.message-text ul {
+    margin: 8px 0;
+    padding-left: 20px;
+}
+
+.message-text li {
+    margin: 4px 0;
+    color: #374151;
+}
+
+.message-text strong {
+    color: #059669;
+}
+
+.message-text em {
+    color: #6b7280;
+    font-style: italic;
+}
+
+.modern-chat-input-wrapper { display: flex; flex-direction: column; align-items: center; padding: 15px; }
+.inline-mic-box {
+    display: flex;
+    align-items: center;
+    background: #f0f2f5;
+    border: none;
+    border-radius: 25px;
+    width: 100%;
+    padding: 6px 6px 6px 16px;
+    gap: 6px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.inline-mic-box input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 10px 8px;
+    font-size: 1rem;
+    color: #333;
+    background: transparent;
+    min-height: 24px;
+}
+
+.inline-mic-box input::placeholder {
+    color: #888;
+}
+
+.inline-mic-box .voice-input-btn {
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    width: 46px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--primary);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.inline-mic-box .voice-input-btn:hover {
+    background: rgba(0, 176, 155, 0.1);
+}
+
+.inline-mic-box .voice-input-btn.listening {
+    background: var(--primary);
+    color: white;
+    animation: pulse 1.5s infinite;
+}
+
+.inline-mic-box .voice-input-btn i {
+    font-size: 1.3rem;
+}
+
+.inline-mic-box .send-btn {
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    width: 46px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.2s ease, background 0.2s ease;
+    flex-shrink: 0;
+    box-shadow: 0 2px 4px rgba(0,176,155,0.3);
+}
+
+.inline-mic-box .send-btn:hover {
+    transform: scale(1.05);
+    background: var(--primary-dark);
+}
+
+.inline-mic-box .send-btn i {
+    font-size: 1.1rem;
+    margin-left: 2px;
+}

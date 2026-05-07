@@ -1,0 +1,78 @@
+<div id="assistant-view" class="view-section" style="padding: 20px; background: linear-gradient(135deg, #eaf6ea, #fffff0);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h2 style="color: #0b4d3c; font-weight: 700; margin: 0;">AI Farming Assistant</h2>
+        <div id="ai-status-badge" style="font-size: 0.8rem; color: #6b7280; display: flex; align-items: center; gap: 6px;">
+            <i class="fas fa-circle" style="color: #00b09b; font-size: 0.7rem;"></i> <span>Ready</span>
+        </div>
+    </div>
+
+    <div class="chat-container modern-chat">
+
+
+        <div id="ai-messages" class="modern-chat-messages">
+            <div class="ai-bubble ai-bot-bubble">
+                <div class="message-content-wrapper">
+                    <div class="message-text">
+                        👋 Namaste! I'm your AI farming assistant. Ask me about crop diseases, fertilizer recommendations, soil health, or farming best practices!
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="ai-typing" style="display:none; padding: 10px 40px;">
+            <div class="typing-indicator">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+
+        <div class="modern-chat-input-wrapper">
+            <div class="inline-mic-box">
+                <button id="chat-mic-btn" type="button" class="voice-input-btn" title="Voice Input">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <input type="text" id="ai-input" placeholder="Type a message..." autocomplete="off">
+                <button onclick="sendAssistantMsg()" type="button" class="send-btn" title="Send">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="voice-dashboard-modal" class="voice-modal-overlay" style="display: none;">
+    <div class="voice-dashboard">
+        <button class="close-modal-btn" onclick="closeVoiceDashboard()"><i class="fas fa-times"></i></button>
+        
+        <div class="display-screen">
+            <div class="waveform" id="waveform-icon">
+                <i class="fas fa-grip-lines-vertical"></i>
+            </div>
+            <div class="voice-text" id="voice-display-text">
+                नमस्ते! मैं आपका वॉइस असिस्टेंट हूँ। आप जो भी बोलेंगे, मैं उसे टाइप कर दूंगा।
+            </div>
+        </div>
+
+        <div class="voice-actions">
+            <button id="btn-listen" onclick="toggleDashboardListening()">Start Listening</button>
+            <button id="btn-test-voice" onclick="testDashboardVoice()">Test Voice</button>
+            <button id="btn-send-chat" onclick="sendVoiceToChat()">Send to Chat</button>
+        </div>
+
+        <div class="voice-controls">
+            <div class="control-row">
+                <label>Voice Selection</label>
+                <select id="voice-select" class="modern-select"></select>
+            </div>
+            <div class="control-row">
+                <label>Speed Rate</label>
+                <input type="range" id="rate-slider" min="0.5" max="2" step="0.1" value="1" oninput="document.getElementById('rate-val').innerText = this.value">
+                <span class="val-box" id="rate-val">1.0</span>
+            </div>
+            <div class="control-row">
+                <label>Voice Pitch</label>
+                <input type="range" id="pitch-slider" min="0" max="2" step="0.1" value="1" oninput="document.getElementById('pitch-val').innerText = this.value">
+                <span class="val-box" id="pitch-val">1.0</span>
+            </div>
+        </div>
+    </div>
+</div>

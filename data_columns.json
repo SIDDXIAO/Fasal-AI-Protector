@@ -1,0 +1,33 @@
+{
+  "excel_columns": [
+    "Crop Name",
+    "Season",
+    "Disease Name",
+    "Hindi Name",
+    "Common/Local Name",
+    "Type",
+    "Damage Description",
+    "How to Recognize",
+    "Best Control Time",
+    "Treatment Options",
+    "MRP (2026)"
+  ],
+  "csv_columns": [
+    "District",
+    "Village",
+    "pincode",
+    "Season",
+    "Crop",
+    "Insect_Name",
+    "Insect_Nickname",
+    "Insect_Hindi_Name",
+    "Insect_Common_Name",
+    "Insect_Type",
+    "Damage_Type",
+    "How_To_Recognize",
+    "Best_Control_Time",
+    "Pesticide_Options",
+    "MRP_2026",
+    "Application_Method"
+  ]
+}

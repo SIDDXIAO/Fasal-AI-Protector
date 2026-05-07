@@ -1,0 +1,196 @@
+{% load static %}
+<div id="dashboard-view" class="view-section active">
+
+    <div id="weather-alert" class="alert-banner" style="display: none;"></div>
+
+    <div class="welcome-banner" style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:20px;">
+        <div class="welcome-text" style="flex: 1; min-width: 200px;">
+            <h1 id="welcome-msg" data-i18n="helloFarmer">Hello, Farmer! 👋</h1>
+            <p data-i18n="farmerOverview">Your smart farm overview.</p>
+            <button onclick="fetchLiveWeather()" style="margin-top: 10px; padding: 8px 16px; border-radius: var(--radius-md); border: none; background: var(--primary); color: white; font-weight: 600; cursor: pointer; box-shadow: var(--shadow-sm);">
+                <i class="fas fa-cloud-sun"></i> Detect Weather
+            </button>
+        </div>
+
+        <div id="weather-card" style="display: none; padding: 12px 16px; border-radius: 14px; background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; min-width: 180px; box-shadow: 0 4px 20px rgba(0, 176, 155, 0.25);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <div id="w-location" style="font-size: 0.85rem; font-weight: 600;">Locating...</div>
+                    <div id="w-desc" style="font-size: 0.75rem; opacity: 0.85;">--</div>
+                </div>
+                <button onclick="showWeatherDashboard()" style="background:rgba(255,255,255,0.15); border:none; color:white; padding:5px 8px; border-radius:6px; cursor:pointer; font-size:0.7rem;">
+                    <i class="fas fa-expand-arrows-alt"></i>
+                </button>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
+                <img id="w-icon" src="" style="width: 50px; height: 50px;">
+                <div id="w-temp" style="font-size: 1.8rem; font-weight: 700;">--°C</div>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 6px; font-size: 0.7rem; opacity: 0.85;">
+                <span><i class="fas fa-tint"></i> <span id="w-humidity">--</span>%</span>
+                <span><i class="fas fa-wind"></i> <span id="w-wind">--</span> m/s</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-grid" style="margin-top: 24px;">
+        <div class="stat-card">
+            <div class="stat-icon bg-green"><i class="fas fa-leaf"></i></div>
+            <div class="stat-value" id="stat-total">0</div>
+            <div style="color:var(--text-light); font-size:0.85rem;" data-i18n="totalScans">Total Scans</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon bg-green"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-value" id="stat-healthy">0</div>
+            <div style="color:var(--text-light); font-size:0.85rem;" data-i18n="healthyScans">Healthy</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon bg-red"><i class="fas fa-bug"></i></div>
+            <div class="stat-value" id="stat-infected">0</div>
+            <div style="color:var(--text-light); font-size:0.85rem;" data-i18n="infectedScans">Infected</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon bg-orange"><i class="fas fa-flask"></i></div>
+            <div class="stat-value" id="stat-efficiency">—</div>
+            <div style="color:var(--text-light); font-size:0.85rem;" data-i18n="efficiency">Efficiency</div>
+        </div>
+    </div>
+
+    <div class="dashboard-widgets" style="margin-top: 24px;">
+        <div class="chart-box" style="flex: 1; min-width: 300px;">
+            <h3>📊 Weekly Scan Activity</h3>
+            <div style="position:relative; height:250px; width:100%;"><canvas id="weeklyChart"></canvas></div>
+        </div>
+
+        <div class="chart-box" style="flex: 1; min-width: 300px; max-width: 450px;">
+            <h3>🧪 Fertilizer Calculator</h3>
+            <p style="color:var(--text-light); font-size:0.85rem; margin-bottom:14px;">Calculate nutrients (Urea/DAP).</p>
+
+            <div style="display: flex; gap: 15px; align-items: flex-start;">
+                <div style="flex: 1;">
+                    <div style="margin-bottom:10px;">
+                        <label style="font-size:0.82rem; color:var(--text-light); display:block; margin-bottom:4px;">Select Crop</label>
+                        <select id="calc-crop" style="width:100%; padding:10px; border-radius:var(--radius-md); border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-main); font-size:0.9rem;">
+                            <optgroup label="Cereals / Grains">
+                                <option value="wheat">Wheat (गेहूं)</option>
+                                <option value="paddy">Paddy (धान)</option>
+                                <option value="bajra">Bajra (बाजरा)</option>
+                                <option value="maize">Maize (मक्का)</option>
+                            </optgroup>
+                            <optgroup label="Cash Crops">
+                                <option value="sugarcane">Sugarcane (गन्ना)</option>
+                                <option value="mustard">Mustard (सरसों)</option>
+                                <option value="potato">Potato (आलू)</option>
+                                <option value="tomato">Tomato (टमाटर)</option>
+                            </optgroup>
+                            <optgroup label="Vegetables">
+                                <option value="brinjal">Brinjal (बैंगन)</option>
+                                <option value="okra">Okra (भिंडी)</option>
+                                <option value="chilli">Chilli (मिर्च)</option>
+                                <option value="cauliflower">Cauliflower (फूलगोभी)</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div style="display:flex; gap:8px; margin-bottom:12px;">
+                        <div style="flex:1;">
+                            <label style="font-size:0.75rem; color:var(--text-light); display:block; margin-bottom:3px;">Unit</label>
+                            <select id="calc-unit" style="width:100%; padding:8px; border-radius:var(--radius-md); border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-main); font-size:0.85rem;">
+                                <option value="acre">Acre</option>
+                                <option value="bigha">Bigha</option>
+                                <option value="hectare">Hectare</option>
+                                <option value="dismil" selected>Dismil</option>
+                            </select>
+                        </div>
+                        <div style="flex:1;">
+                            <label id="calc-area-label" style="font-size:0.75rem; color:var(--text-light); display:block; margin-bottom:3px;">Size</label>
+                            <input type="number" id="calc-area" placeholder="e.g. 50" style="width:100%; padding:8px; border-radius:var(--radius-md); border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-main); font-size:0.85rem;">
+                        </div>
+                    </div>
+
+                    <button class="btn-auth" onclick="calculateFertilizer()" style="background:var(--primary); width:100%; padding:10px;">Calculate Dose</button>
+                </div>
+
+                <div id="calc-result" style="width: 140px; background: linear-gradient(135deg, var(--primary-glow), rgba(150,201,61,0.1)); padding: 15px; border-radius: var(--radius-md); text-align:center;">
+                    <div style="font-size:0.75rem; color:var(--text-light); margin-bottom:8px; font-weight:600;">Result</div>
+                    <div style="margin-bottom:10px;">
+                        <div style="font-size:0.7rem; color:var(--text-secondary);">Urea</div>
+                        <div style="font-size:1.4rem; font-weight:700; color:var(--primary);"><span id="res-urea">0</span> <span style="font-size:0.7rem; font-weight:400;">kg</span></div>
+                    </div>
+                    <div>
+                        <div style="font-size:0.7rem; color:var(--text-secondary);">DAP</div>
+                        <div style="font-size:1.4rem; font-weight:700; color:var(--primary);"><span id="res-dap">0</span> <span style="font-size:0.7rem; font-weight:400;">kg</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Weather Dashboard Modal -->
+<div id="weather-dashboard-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; overflow-y:auto; backdrop-filter: blur(8px);">
+    <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); min-height: 100vh; padding: 20px; color: white;">
+        <div style="max-width: 900px; margin: 0 auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, var(--primary), #0d9488); border-radius: 16px; box-shadow: 0 8px 30px rgba(0,176,155,0.3);">
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <div style="width:50px; height:50px; background:rgba(255,255,255,0.2); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.5rem;">
+                        <i class="fas fa-cloud-sun"></i>
+                    </div>
+                    <div>
+                        <h2 style="margin:0; color:white; font-size:1.5rem; font-weight:700;">Weather Forecast</h2>
+                        <p style="margin:5px 0 0; opacity:0.8; font-size:0.85rem;">7-Day Agricultural Weather Insights</p>
+                    </div>
+                </div>
+                <button onclick="closeWeatherDashboard()" style="background: rgba(255,255,255,0.15); border: none; color: white; width: 40px; height: 40px; border-radius: 10px; font-size: 1.3rem; cursor: pointer; transition: all 0.2s;">&times;</button>
+            </div>
+
+            <div id="weather-current" style="text-align: center; margin-bottom: 30px; padding: 35px; background: linear-gradient(135deg, rgba(0,176,155,0.15), rgba(150,201,61,0.1)); border: 1px solid rgba(0,176,155,0.2); border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.2);">
+                <h3 id="wd-location" style="font-size: 1.4rem; margin-bottom: 15px; color: white; display:flex; align-items:center; justify-content:center; gap:10px;">
+                    <i class="fas fa-map-marker-alt" style="color:var(--primary);"></i> --
+                </h3>
+                <div style="display: flex; justify-content: center; align-items: center; gap: 25px; flex-wrap: wrap;">
+                    <img id="wd-icon" src="" style="width: 110px; height: 110px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));">
+                    <div>
+                        <div id="wd-temp" style="font-size: 4.5rem; font-weight: 800; color: white; line-height:1; text-shadow: 0 2px 10px rgba(0,0,0,0.2);">--°C</div>
+                        <div id="wd-desc" style="font-size: 1.3rem; text-transform: capitalize; color: rgba(255,255,255,0.85); margin-top:5px; font-weight:500;">--</div>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: center; gap: 35px; margin-top: 25px; flex-wrap: wrap; padding: 15px; background: rgba(0,0,0,0.15); border-radius: 12px;">
+                    <div style="display:flex; align-items:center; gap:8px; color: rgba(255,255,255,0.9);"><i class="fas fa-tint" style="color:#3b82f6;"></i> <span style="font-weight:600;">Humidity:</span> <span id="wd-humidity">--</span>%</div>
+                    <div style="display:flex; align-items:center; gap:8px; color: rgba(255,255,255,0.9);"><i class="fas fa-wind" style="color:#96c93d;"></i> <span style="font-weight:600;">Wind:</span> <span id="wd-wind">--</span> m/s</div>
+                    <div style="display:flex; align-items:center; gap:8px; color: rgba(255,255,255,0.9);"><i class="fas fa-sun" style="color:#f59e0b;"></i> <span style="font-weight:600;">Sunrise:</span> <span id="wd-sunrise">--:--</span></div>
+                    <div style="display:flex; align-items:center; gap:8px; color: rgba(255,255,255,0.9);"><i class="fas fa-moon" style="color:#a855f7;"></i> <span style="font-weight:600;">Sunset:</span> <span id="wd-sunset">--:--</span></div>
+                </div>
+            </div>
+
+            <h3 style="margin-bottom: 20px; color: white; display:flex; align-items:center; gap:10px; font-size:1.2rem;">
+                <i class="fas fa-calendar-week" style="color:var(--primary);"></i> 7-Day Forecast
+            </h3>
+            <div id="weather-forecast" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(115px, 1fr)); gap: 15px; margin-bottom: 30px;"></div>
+
+            <div style="margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px;">
+                <div style="background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid #334155; padding: 22px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                    <h4 style="margin: 0 0 12px 0; color: white; display:flex; align-items:center; gap:10px; font-size:1rem;">
+                        <i class="fas fa-tint-slash" style="color:#3b82f6;"></i> Humidity
+                    </h4>
+                    <div id="wd-humidity-detail" style="font-size: 1.3rem; color: var(--primary); font-weight:700;">--</div>
+                    <p style="margin:8px 0 0; color:#64748b; font-size:0.8rem;">Current humidity level</p>
+                </div>
+                <div style="background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid #334155; padding: 22px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                    <h4 style="margin: 0 0 12px 0; color: white; display:flex; align-items:center; gap:10px; font-size:1rem;">
+                        <i class="fas fa-wind" style="color:#96c93d;"></i> Wind Speed
+                    </h4>
+                    <div id="wd-wind-detail" style="font-size: 1.3rem; color: #96c93d; font-weight:700;">--</div>
+                    <p style="margin:8px 0 0; color:#64748b; font-size:0.8rem;">Current wind speed</p>
+                </div>
+                <div style="background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid #334155; padding: 22px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                    <h4 style="margin: 0 0 12px 0; color: white; display:flex; align-items:center; gap:10px; font-size:1rem;">
+                        <i class="fas fa-cloud-rain" style="color:#3b82f6;"></i> Rain Chance
+                    </h4>
+                    <div id="wd-rain-detail" style="font-size: 1.3rem; color: #3b82f6; font-weight:700;">--%</div>
+                    <p style="margin:8px 0 0; color:#64748b; font-size:0.8rem;">Precipitation probability</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
